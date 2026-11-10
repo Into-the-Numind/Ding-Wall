@@ -1,0 +1,60 @@
+{
+  "name": "dsh-ding-wall",
+  "version": "0.1.3",
+  "description": "Ding Wall · 钉一下 — a warm paper-style shared pinboard plugin for DeepSeek Harness: ideas, to-dos, anonymous notes and team pulse.",
+  "type": "module",
+  "main": "lib/index.js",
+  "exports": {
+    ".": "./lib/index.js",
+    "./client": "./client.js",
+    "./locale/*.json": "./locale/*.json",
+    "./icon": "./icon.svg"
+  },
+  "files": [
+    "lib",
+    "client.js",
+    "cordis.patch.yml",
+    "locale/*.json",
+    "icon.svg",
+    "README.md",
+    "README.zh-CN.md",
+    "LICENSE",
+    "screenshots"
+  ],
+  "keywords": [
+    "deepseek-harness",
+    "dsh",
+    "dsh-plugin",
+    "pinboard",
+    "sticky-notes",
+    "team",
+    "productivity"
+  ],
+  "homepage": "https://github.com/Into-the-Numind/dsh-ding-wall#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Into-the-Numind/dsh-ding-wall.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Into-the-Numind/dsh-ding-wall/issues"
+  },
+  "author": "Into the Numind",
+  "license": "MIT",
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web",
+      "immediately": false,
+      "inject": [
+        "@deepseek-ai/dsh-client-ui-slots",
+        "@deepseek-ai/dsh-client-ui-layout",
+        "@deepseek-ai/dsh-client-ui-locale"
+      ]
+    }
+  },
+  "scripts": {
+    "test": "node --test test/host.test.mjs test/client.test.mjs"
+  }
+}

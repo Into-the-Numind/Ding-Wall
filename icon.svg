@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="Ding Wall">
+  <defs>
+    <radialGradient id="pinHead" cx="35%" cy="30%" r="75%">
+      <stop offset="0%" stop-color="#f4a08e"/>
+      <stop offset="38%" stop-color="#d35b41"/>
+      <stop offset="80%" stop-color="#a53a26"/>
+      <stop offset="100%" stop-color="#7d2a1a"/>
+    </radialGradient>
+    <linearGradient id="paper" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#f7f0e1"/>
+      <stop offset="100%" stop-color="#e7d9bd"/>
+    </linearGradient>
+  </defs>
+  <rect x="12" y="14" width="40" height="38" rx="3" fill="url(#paper)" stroke="#22201c" stroke-opacity="0.18"/>
+  <path d="M18 26h28M18 33h20M18 40h24" stroke="#22201c" stroke-opacity="0.35" stroke-width="2" stroke-linecap="round"/>
+  <circle cx="32" cy="19" r="8.5" fill="url(#pinHead)"/>
+  <ellipse cx="29.5" cy="16" rx="2.4" ry="1.7" fill="#f4a08e" opacity="0.85"/>
+  <path d="M32 27v7" stroke="#5b3a2b" stroke-opacity="0.7" stroke-width="2" stroke-linecap="round"/>
+</svg>
