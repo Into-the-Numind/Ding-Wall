@@ -1,162 +1,158 @@
-# Ding Wall · 钉一钉
+# 钉一钉 · Ding Wall
 
-**A warm, paper-like shared pinboard for small teams — as a DeepSeek Harness panel plugin.**
+**给小团队的暖纸共享信息墙 —— 一个 DeepSeek Harness 面板插件。**
 
-Ideas pinned as sticky notes, to-dos as index cards, anonymous feedback in a kraft-paper mailbox. Real-time sync for a small team, a hand-drawn “team pulse”, and a morning-paper mode for stand-ups.
+想法变成便签，待办变成索引卡，匿名意见投进牛皮纸信箱。小团队实时同步，手绘风格的「团队心跳」，还有适合站会的晨报模式。
 
-[English](README.md) · [简体中文](README.zh-CN.md) · [Install with an agent](#install-with-an-agent) · [Manual install](#manual-install) · [Screenshots](#screenshots) · [Features](#features)
+[English](README.en.md) · **简体中文** · [让 Agent 安装](#让-agent-安装) · [手动安装](#手动安装) · [截图](#截图) · [功能](#功能)
 
-![Ding Wall panel](screenshots/panel-wide.png)
+![钉一钉面板](screenshots/panel-wide.png)
 
-## Install with an agent
+## 让 Agent 安装
 
-Copy the prompt below into an AI agent that can work on your computer — DeepSeek Harness, Claude Code, Codex, or any agent with shell/file access. It handles the install end to end.
+把下面这段提示词发给一个能在你电脑上执行操作的 AI Agent（DeepSeek Harness、Claude Code、Codex，或任何有 shell / 文件权限的 Agent），它会帮你从头装好。
 
-> **Install prompt (copy everything in this block)**
+> **安装提示词（复制这一段）**
 >
-> Please install the DeepSeek Harness plugin **Ding Wall** (`dsh-ding-wall`) from https://github.com/Into-the-Numind/Ding-Wall.
+> 请帮我安装 DeepSeek Harness 插件 **钉一钉**（`dsh-ding-wall`），仓库地址：https://github.com/Into-the-Numind/Ding-Wall
 >
-> 1. Clone the repository into a permanent directory, for example:
+> 1. 把仓库克隆到一个**固定目录**，例如：
 >    `git clone https://github.com/Into-the-Numind/Ding-Wall.git ~/dsh-plugins/dsh-ding-wall`
->    Keep this directory — DeepSeek Harness loads the plugin from it. Do not delete or move it afterwards.
-> 2. Install that directory as a plugin bundle in DeepSeek Harness:
->    - If you have the `plugin_manager` tool: call `install_bundle` with `target` set to the **absolute path of the cloned directory** (the folder containing `package.json`), then make sure the bundle is enabled.
->    - Otherwise use Plugin Manager → Add plugin → local folder, or `dsh plugin --profile <profile> add link:<absolute-path>` if this DSH build provides that CLI.
-> 3. Confirm the bundle `dsh-ding-wall` is installed and enabled. Then tell me to **fully quit and restart DeepSeek Harness** — the host half of the plugin loads on restart (a page refresh is not enough).
-> 4. After my restart, verify with me that a red pin icon labeled **“钉一钉 / Ding Wall”** appears in the sidebar and that opening it shows the wall.
+>    这个目录要保留，DeepSeek Harness 会从它加载插件，安装后不要删除或移动。
+> 2. 在这个 DeepSeek Harness 里把该目录安装为插件包：
+>    - 如果你有 `plugin_manager` 工具：调用 `install_bundle`，`target` 设为克隆下来的目录**绝对路径**（包含 `package.json` 的那一层），并确保它已启用；
+>    - 否则让我从「插件管理器 → 添加插件 → 本地目录」安装，或者在当前 DSH 版本支持 CLI 时执行 `dsh plugin --profile <profile> add link:<绝对路径>`。
+> 3. 确认插件包 `dsh-ding-wall` 已安装并启用。然后提醒我**完全退出并重启 DeepSeek Harness**——宿主侧代码在重启时加载，刷新页面不够。
+> 4. 重启后和我一起确认：侧栏出现红色图钉「钉一钉」，点开能看到信息墙。
 >
-> Do not publish anything or modify other plugins. Report the commands you ran, any warnings, and what I should check.
+> 不要发布任何内容，也不要修改其他插件。最后把执行过的命令、警告和需要我检查的事项告诉我。
 
-### Even shorter
+### 更短的一句话
 
-> Install the DeepSeek Harness plugin at **https://github.com/Into-the-Numind/Ding-Wall** — clone it, add it as a local plugin bundle, then tell me to fully restart DeepSeek Harness.
+> 安装 DeepSeek Harness 插件 **https://github.com/Into-the-Numind/Ding-Wall** —— 克隆到固定目录、作为本地插件包安装，然后提醒我完全重启 DeepSeek Harness。
 
-### What “done” looks like
+### 怎么算装好了
 
-- `dsh-ding-wall` appears as an installed plugin bundle and is enabled;
-- after a **full app restart**, the sidebar shows a red pin **钉一钉**;
-- opening it shows the paper wall, and the first visit asks you to claim a team card;
-- no network requests are made in the default local mode.
+- `dsh-ding-wall` 出现在插件列表中，且处于启用状态；
+- **完全重启应用**后，侧栏出现红色图钉「钉一钉」；
+- 点开能看到暖纸信息墙，首次进入会要求认领一张团队名片；
+- 默认本地模式不会发起任何网络请求。
 
-> If the plugin manager in your DSH build cannot install a local directory, install it the same way you install any other local plugin bundle and point it at the cloned folder. If the icon does not appear, make sure you fully restarted Harness, not just reloaded the window.
+> 如果你的 DSH 版本插件管理器不支持安装本地目录，就用安装其他本地插件包的方式安装这个文件夹。如果图钉没出现，先确认是**完全重启**了 Harness，而不是只刷新了窗口。
 
-## Screenshots
+## 截图
 
-| Wall | Morning paper |
+| 信息墙 | 晨报模式 |
 | --- | --- |
-| ![Wall](screenshots/panel-wide.png) | ![Morning paper](screenshots/morning-mode.png) |
+| ![信息墙](screenshots/panel-wide.png) | ![晨报模式](screenshots/morning-mode.png) |
 
-| Composer | Claim a card |
+| 钉一张 | 认领名片 |
 | --- | --- |
-| ![Composer](screenshots/composer.png) | ![Identity](screenshots/identity.png) |
+| ![钉一张](screenshots/composer.png) | ![认领名片](screenshots/identity.png) |
 
-| Narrow panel | Team pulse |
+| 窄面板 | 团队心跳 |
 | --- | --- |
-| ![Narrow panel](screenshots/panel-narrow.png) | ![Team pulse](screenshots/team-pulse.png) |
+| ![窄面板](screenshots/panel-narrow.png) | ![团队心跳](screenshots/team-pulse.png) |
 
-## Features
+## 功能
 
-- **Ideas as sticky notes** — one click to pin a thought; drag the wall into a calm paper workspace.
-- **To-dos as index cards** — tomorrow / this week, with a satisfying DONE stamp.
-- **Anonymous mailbox** — opinions are posted without an author; the server does not store who wrote them.
-- **Real-time team pulse** — presence, activity bars and a hand-drawn weekly rhythm.
-- **Morning paper** — a broadsheet view for stand-ups, refreshed daily.
-- **Warm paper aesthetic** — cream paper, Songti display type, pins, tape, rubber stamps and grain, restored from the original web design.
-- **Local-first** — the default mode is completely local (`$DSH_HOME/ding-wall/wall.json`); no account, no cloud.
-- **Bilingual UI** — 简体中文 / English, following the Harness locale.
+- **灵感便签**：点一下就能把想法钉上墙，便签可以拖动、撕下。
+- **待办索引卡**：明天 / 这周两栏，完成时盖一枚「完成」印章。
+- **匿名信箱**：匿名意见不记录作者，服务端不会存是谁写的。
+- **团队心跳**：在线状态、活动条、手绘风格的一周节奏。
+- **晨报模式**：适合站会的报纸版面，每天刷新。
+- **暖纸视觉**：奶油纸色、宋体标题、图钉、胶带、橡皮章和纸纹，来自最初的网页版设计。
+- **本地优先**：默认模式完全本地（`$DSH_HOME/ding-wall/wall.json`），无账号、无云端。
+- **中英双语**：跟随 Harness 的语言设置。
 
-## Requirements & compatibility
+## 环境要求与兼容性
 
-- DeepSeek Harness Desktop with the Web UI. Built and tested against the **DSH 0.2.1** series (November 2026).
-- The plugin uses Harness client slot APIs (`sidebar.panellist`, main panel, locale, layout); these APIs are not frozen, so a future DSH major version may need small adjustments.
-- No build step and no runtime npm dependencies: the client is a prebuilt ESM bundle, the host uses Node built-ins only.
-- macOS / Windows / Linux wherever Harness Desktop runs.
+- DeepSeek Harness Desktop 的 Web UI。基于 **DSH 0.2.1** 系列（2026 年 11 月）开发与测试。
+- 插件使用了 Harness 的客户端插槽 API（`sidebar.panellist`、主面板、locale、layout）；这些 API 尚未冻结，未来 DSH 大版本可能需要小幅适配。
+- 无需构建、运行时无 npm 依赖：客户端是预构建 ESM bundle，宿主侧只用 Node 内置模块。
+- 支持 Harness Desktop 所在的 macOS / Windows / Linux。
 
-## Manual install
+## 手动安装
 
-1. Clone the repo somewhere permanent:
+1. 克隆到一个固定目录：
 
    ```bash
    git clone https://github.com/Into-the-Numind/Ding-Wall.git ~/dsh-plugins/dsh-ding-wall
    ```
 
-2. In DeepSeek Harness, open **Plugins → Add plugin → local directory** and select the cloned folder (the one containing `package.json`). Enable the plugin.
+2. 打开 DeepSeek Harness 的**插件 → 添加插件 → 本地目录**，选择克隆下来的文件夹（包含 `package.json` 的那一层），启用插件。
 
-3. **Fully quit and restart DeepSeek Harness.** (Host-side plugin code is loaded at startup; a page refresh only reloads the UI.)
+3. **完全退出并重启 DeepSeek Harness。**（宿主侧插件代码在启动时加载；刷新页面只会重载 UI。）
 
-4. Click the red pin **钉一钉** in the sidebar. On first open, claim your team card.
+4. 点击侧栏红色图钉「钉一钉」。首次打开时认领你的团队名片。
 
-### Update
+### 更新
 
 ```bash
 cd ~/dsh-plugins/dsh-ding-wall
 git pull
 ```
 
-Then fully restart Harness. If you installed a snapshot instead of a git checkout, reinstall that folder.
+然后完全重启 Harness。如果你安装的是快照而不是 git 仓库，重新安装该目录即可。
 
-### Uninstall
+### 卸载
 
-Remove the plugin in Plugin Manager. Your wall data stays in `$DSH_HOME/ding-wall/`; delete that folder if you want a clean slate. (On macOS, `$DSH_HOME` is usually `~/.dsh`.)
+在插件管理器中移除插件。墙的数据仍保留在 `$DSH_HOME/ding-wall/`；如需彻底清空，删除该目录即可。（macOS 上 `$DSH_HOME` 一般是 `~/.dsh`。）
 
-## Data, privacy & network
+## 数据、隐私与网络
 
-- **Local-first:** data is stored in `$DSH_HOME/ding-wall/wall.json` and never leaves the machine in the default local mode.
-- **Anonymous opinions:** no author ID is persisted for mailbox entries.
-- **No telemetry, no analytics, no CDN calls.**
-- The host plugin runs with your user permissions — like any Harness plugin, read the source before installing if you need to.
-- Only if you explicitly configure a shared team server does the host make network requests to that URL.
+- **本地优先**：默认模式下数据存在 `$DSH_HOME/ding-wall/wall.json`，不会离开本机。
+- **匿名意见**：信箱条目不会持久化任何作者标识。
+- **无遥测、无统计、无 CDN 请求。**
+- 宿主插件以你的用户权限运行——和任何 Harness 插件一样，介意的话安装前先读源码。
+- 只有当你显式配置了共享团队服务器时，宿主才会向该 URL 发起网络请求。
 
-## Shared team mode (optional)
+## 共享团队模式（可选）
 
-Ding Wall can also be the UI for a small shared wall served by a compatible self-hosted backend. Configure it in your Harness profile patch — the access token stays host-side and is never sent to the browser:
+钉一钉也可以作为一个小团队共享墙的界面，后端可以自托管。在 Harness 的 profile 补丁里配置——访问码只存在宿主侧，不会下发浏览器：
 
 ```yaml
 - id: ding-wall
   name: dsh-ding-wall
   config:
     serverUrl: "https://your-wall.example.com"
-    # optional: shared access code, attached by the host proxy as a Bearer token
+    # 可选：共享访问码，由宿主代理以 Bearer 形式附加
     serverToken: "your-team-access-code"
-    # optional: pin a self-signed CA for deployments without a public certificate
+    # 可选：没有公网证书的部署，固定自签 CA
     # serverCa: |
     #   -----BEGIN CERTIFICATE-----
     #   ...
     #   -----END CERTIFICATE-----
 ```
 
-The wall server itself is not included in this repository; the plugin speaks a small JSON + SSE API. Without `serverUrl`, everything runs locally.
+本仓库不包含墙服务端；插件只依赖一套很小的 JSON + SSE 接口。不配置 `serverUrl` 时，一切都在本地运行。
 
-## Keyboard shortcuts
+## 快捷键
 
-| Shortcut | Action |
+| 快捷键 | 操作 |
 | --- | --- |
-| `Ctrl`/`⌘` + `Enter` | Submit the open composer |
-| `Esc` | Close composer / modal |
+| `Ctrl`/`⌘` + `Enter` | 提交当前弹层 |
+| `Esc` | 关闭弹层 |
 
-## Development
+## 开发
 
 ```bash
 npm test
-# or: node --test test/host.test.mjs test/client.test.mjs
+# 或者：node --test test/host.test.mjs test/client.test.mjs
 ```
 
-No dependencies to install — tests run on plain Node.js 20+.
+无需安装依赖，测试直接跑在 Node.js 20+。
 
-| Path | What it is |
+| 路径 | 说明 |
 | --- | --- |
-| `package.json` | DSH bundle manifest (`dsh.bundle` + `dsh.client`) |
-| `cordis.patch.yml` | Bundle patch: sidebar panel + main panel entries |
-| `lib/index.js` | Host plugin: local store, shared-mode proxy, `/api/ding-wall/*` routes |
-| `lib/store.js`, `lib/api.js`, `lib/sse.js` | Local API, atomic JSON persistence, SSE hub |
-| `lib/proxy.js` | Shared-mode reverse proxy (including SSE, token and CA pinning) |
-| `client.js` | Prebuilt client bundle: React panel, CSS, zh/en dictionaries |
-| `test/` | Host and client contract tests |
+| `package.json` | DSH 插件包清单（`dsh.bundle` + `dsh.client`） |
+| `cordis.patch.yml` | 插件包补丁：侧栏入口 + 主面板 |
+| `lib/index.js` | 宿主插件：本地存储、共享模式代理、`/api/ding-wall/*` 路由 |
+| `lib/store.js`、`lib/api.js`、`lib/sse.js` | 本地 API、原子 JSON 落盘、SSE 广播 |
+| `lib/proxy.js` | 共享模式反向代理（含 SSE、访问码与 CA 固定） |
+| `client.js` | 预构建客户端 bundle：React 面板、样式、中英词典 |
+| `test/` | 宿主与客户端契约测试 |
 
-## License
+## 许可证
 
 [MIT](LICENSE) © Into the Numind
-
----
-
-Built for three people trying to stay on the same page. If you use it, we’d love to hear what your wall looks like.
