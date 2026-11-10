@@ -21,6 +21,7 @@
 > 1. 把仓库克隆到一个**固定目录**，例如：
 >    `git clone https://github.com/Into-the-Numind/Ding-Wall.git ~/dsh-plugins/dsh-ding-wall`
 >    这个目录要保留，DeepSeek Harness 会从它加载插件，安装后不要删除或移动。
+>    Windows（PowerShell）把 `~` 换成 `$env:USERPROFILE`，例如 `$env:USERPROFILE\dsh-plugins\dsh-ding-wall`；不要照抄 Unix 的 `cp`/`readlink`。
 > 2. 在这个 DeepSeek Harness 里把该目录安装为插件包：
 >    - 如果你有 `plugin_manager` 工具：调用 `install_bundle`，`target` 设为克隆下来的目录**绝对路径**（包含 `package.json` 的那一层），并确保它已启用；
 >    - 否则让我从「插件管理器 → 添加插件 → 本地目录」安装，或者在当前 DSH 版本支持 CLI 时执行 `dsh plugin --profile <profile> add link:<绝对路径>`。
@@ -85,6 +86,11 @@
 
    ```bash
    git clone https://github.com/Into-the-Numind/Ding-Wall.git ~/dsh-plugins/dsh-ding-wall
+   ```
+
+   Windows（PowerShell）：
+   ```powershell
+   git clone https://github.com/Into-the-Numind/Ding-Wall.git "$env:USERPROFILE\dsh-plugins\dsh-ding-wall"
    ```
 
 2. 打开 DeepSeek Harness 的**插件 → 添加插件 → 本地目录**，选择克隆下来的文件夹（包含 `package.json` 的那一层），启用插件。

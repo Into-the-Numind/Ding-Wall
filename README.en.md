@@ -21,6 +21,7 @@ Copy the prompt below into an AI agent that can work on your computer — DeepSe
 > 1. Clone the repository into a permanent directory, for example:
 >    `git clone https://github.com/Into-the-Numind/Ding-Wall.git ~/dsh-plugins/dsh-ding-wall`
 >    Keep this directory — DeepSeek Harness loads the plugin from it. Do not delete or move it afterwards.
+>    On Windows (PowerShell), replace `~` with `$env:USERPROFILE`, e.g. `$env:USERPROFILE\dsh-plugins\dsh-ding-wall`; use PowerShell equivalents for file commands.
 > 2. Install that directory as a plugin bundle in DeepSeek Harness:
 >    - If you have the `plugin_manager` tool: call `install_bundle` with `target` set to the **absolute path of the cloned directory** (the folder containing `package.json`), then make sure the bundle is enabled.
 >    - Otherwise use Plugin Manager → Add plugin → local folder, or `dsh plugin --profile <profile> add link:<absolute-path>` if this DSH build provides that CLI.
@@ -85,6 +86,11 @@ Copy the prompt below into an AI agent that can work on your computer — DeepSe
 
    ```bash
    git clone https://github.com/Into-the-Numind/Ding-Wall.git ~/dsh-plugins/dsh-ding-wall
+   ```
+
+   Windows (PowerShell):
+   ```powershell
+   git clone https://github.com/Into-the-Numind/Ding-Wall.git "$env:USERPROFILE\dsh-plugins\dsh-ding-wall"
    ```
 
 2. In DeepSeek Harness, open **Plugins → Add plugin → local directory** and select the cloned folder (the one containing `package.json`). Enable the plugin.
