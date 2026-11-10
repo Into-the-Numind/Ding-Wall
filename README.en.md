@@ -50,7 +50,7 @@ If you'd like an agent to install it, send the one-liner below to an AI agent th
 
 - **Ideas as sticky notes** — one click to pin a thought; drag the wall into a calm paper workspace.
 - **To-dos as index cards** — tomorrow / this week, with a satisfying DONE stamp.
-- **Anonymous mailbox** — opinions are posted without an author; the server does not store who wrote them.
+- **Anonymous mailbox** — opinions are posted without an author; the server does not store who wrote them. Open a letter to delete it (team moderation; still no author stored).
 - **Real-time team pulse** — presence, activity bars and a hand-drawn weekly rhythm.
 - **Morning paper** — a broadsheet view for stand-ups, refreshed daily.
 - **Warm paper aesthetic** — cream paper, Songti display type, pins, tape, rubber stamps and grain, restored from the original web design.

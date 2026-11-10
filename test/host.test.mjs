@@ -164,6 +164,15 @@ test('本地模式：成员、想法、待办、匿名意见完整走一遍', as
     const reactionResponse = await json(base, `${PREFIX}/ideas/${idea.id}/react`, { method: 'POST', body: { kind: 'spark' }, headers });
     const reactionPayload = await reactionResponse.json();
     assert.equal(reactionPayload.idea.reactions.spark.count, 1);
+
+    // 匿名信删除：不需要作者信息，但需要成员身份
+    const noMemberDelete = await json(base, `${PREFIX}/opinions/${opinion.id}`, { method: 'DELETE' });
+    assert.equal(noMemberDelete.status, 400);
+    const deleteResponse = await json(base, `${PREFIX}/opinions/${opinion.id}`, { method: 'DELETE', headers });
+    assert.equal(deleteResponse.status, 200);
+    assert.equal((await deleteResponse.json()).ok, true);
+    const afterDelete = await (await json(base, `${PREFIX}/state`)).json();
+    assert.equal(afterDelete.opinions.length, 0);
   });
 });
 

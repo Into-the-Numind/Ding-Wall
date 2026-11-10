@@ -165,6 +165,7 @@ window.__ModuleLoader__.load({
       ideaAdded: '想法钉上墙了',
       todoAdded: '待办加上墙了',
       letterSent: '信投进信箱了',
+      letterDeleted: '匿名信已销毁',
       reactNeedIdentity: '先认领一张名片，才能盖章',
       morningRequires: '墙上还没有内容，先钉一张吧',
       loading: '正在打开这面墙…',
@@ -313,6 +314,7 @@ window.__ModuleLoader__.load({
       ideaAdded: 'Idea pinned',
       todoAdded: 'To-do added',
       letterSent: 'Letter delivered',
+      letterDeleted: 'Letter deleted',
       reactNeedIdentity: 'Claim a card first',
       morningRequires: 'Nothing on the wall yet.',
       loading: 'Opening the wall…',
@@ -3006,6 +3008,7 @@ window.__ModuleLoader__.load({
     /* ------------------------------------------------------------ 匿名信箱 */
     function EchoSection({ data, t, lang, actions, onCompose }) {
       const [openId, setOpenId] = useState(null);
+      const [deleteConfirmId, setDeleteConfirmId] = useState(null);
       function drawLetter() {
         if (data.opinions.length === 0) {
           actions.toast(t('emptyLettersTitle'));
@@ -3088,6 +3091,20 @@ window.__ModuleLoader__.load({
                         className: 'dw-linkbtn',
                         onClick: () => setOpenId(open ? null : opinion.id),
                       }, open ? t('fold') : t('read')),
+                      open
+                        ? h('button', {
+                            type: 'button',
+                            className: cx('dw-linkbtn', 'dw-linkbtn--danger', deleteConfirmId === opinion.id && 'is-armed'),
+                            onClick: () => {
+                              if (deleteConfirmId === opinion.id) {
+                                setDeleteConfirmId(null);
+                                void actions.deleteOpinion(opinion);
+                              } else {
+                                setDeleteConfirmId(opinion.id);
+                              }
+                            },
+                          }, deleteConfirmId === opinion.id ? t('confirmDelete') : t('delete'))
+                        : null,
                       h('span', { className: 'dw-letter__seal' }, t('anonSeal')),
                     ),
                     open ? h('p', { className: 'dw-letter__stamp-line' }, `${fullTime(opinion.createdAt, lang)} · ${t('anonymous')}`) : null,
@@ -4080,6 +4097,18 @@ window.__ModuleLoader__.load({
         }
       }
 
+      async function deleteOpinion(opinion) {
+        const member = requireMe();
+        if (!member) return;
+        try {
+          await request(`/opinions/${opinion.id}`, { method: 'DELETE', memberId: member.id });
+          await refresh();
+          showToast(t('letterDeleted'));
+        } catch (error) {
+          showToast(String(error && error.message ? error.message : error));
+        }
+      }
+
       async function seedDemo() {
         try {
           await request('/demo/seed', { method: 'POST' });
@@ -4171,6 +4200,7 @@ window.__ModuleLoader__.load({
         updateTodo,
         deleteTodo,
         reactOpinion,
+        deleteOpinion,
         seedDemo,
         clearDemo,
       };
