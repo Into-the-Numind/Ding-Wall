@@ -1,7 +1,7 @@
 {
   "name": "dsh-ding-wall",
-  "version": "0.1.3",
-  "description": "Ding Wall · 钉一下 — a warm paper-style shared pinboard plugin for DeepSeek Harness: ideas, to-dos, anonymous notes and team pulse.",
+  "version": "0.1.4",
+  "description": "Ding Wall · 钉一钉 — a warm paper-style shared pinboard plugin for DeepSeek Harness: ideas, to-dos, anonymous notes and team pulse.",
   "type": "module",
   "main": "lib/index.js",
   "exports": {
@@ -30,13 +30,13 @@
     "team",
     "productivity"
   ],
-  "homepage": "https://github.com/Into-the-Numind/dsh-ding-wall#readme",
+  "homepage": "https://github.com/Into-the-Numind/Ding-Wall#readme",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Into-the-Numind/dsh-ding-wall.git"
+    "url": "git+https://github.com/Into-the-Numind/Ding-Wall.git"
   },
   "bugs": {
-    "url": "https://github.com/Into-the-Numind/dsh-ding-wall/issues"
+    "url": "https://github.com/Into-the-Numind/Ding-Wall/issues"
   },
   "author": "Into the Numind",
   "license": "MIT",

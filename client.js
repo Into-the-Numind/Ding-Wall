@@ -1,5 +1,5 @@
 /*
- * 钉一下 · 三个人的墙 —— 浏览器半侧 bundle
+ * 钉一钉 · 三个人的墙 —— 浏览器半侧 bundle
  *
  * 形态：注册进 DSH 的 `main` 面板（key = ding-wall）与 `sidebar.panellist`
  * 图标（id = ding-wall），两者 id 相同即互相绑定。
@@ -24,8 +24,8 @@ window.__ModuleLoader__.load({
 
     /* ------------------------------------------------------------ 文案 */
     const ZH = {
-      sidebarLabel: '钉一下',
-      brand: '钉一下',
+      sidebarLabel: '钉一钉',
+      brand: '钉一钉',
       subtitle: '三个人的墙',
       newPin: '钉一张',
       morning: '晨会',
@@ -129,7 +129,7 @@ window.__ModuleLoader__.load({
       localHint: '数据只存在这台设备',
       noMembers: '墙上只有你',
       identityHint: '点右上角改名片',
-      morningTitle: '钉一下 · 晨报',
+      morningTitle: '钉一钉 · 晨报',
       morningIssue: '第 {n} 期',
       morningEditor: '编辑部：全体成员',
       headline: '今日头条',
@@ -389,7 +389,7 @@ window.__ModuleLoader__.load({
     /* ---------------------------------------------------------- 样式表 */
     const CSS = String.raw`
 /* ============================================================
-   钉一下 · 三个人的墙 —— 面板视觉层（复原网页版「暖纸工作室」）
+   钉一钉 · 三个人的墙 —— 面板视觉层（复原网页版「暖纸工作室」）
    纸感底色 / 宋体标题 / 便签 / 图钉 / 胶带 / 牛皮纸信箱 / 方格纸
    ============================================================ */
 .dw-root {
@@ -3216,7 +3216,7 @@ window.__ModuleLoader__.load({
             h(
               'div',
               null,
-              h('p', { className: 'dw-card__kicker' }, `NEW PIN · ${lang === 'zh' ? '钉一下' : 'DING'}`),
+              h('p', { className: 'dw-card__kicker' }, `NEW PIN · ${lang === 'zh' ? '钉一钉' : 'DING'}`),
               h('h2', { className: 'dw-card__title', id: 'dw-composer-title' }, titles[type]),
             ),
             h('button', { type: 'button', className: 'dw-close', onClick: onClose, 'aria-label': t('close') }, '×'),

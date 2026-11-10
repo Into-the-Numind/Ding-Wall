@@ -1,4 +1,4 @@
-# Ding Wall · 钉一下
+# Ding Wall · 钉一钉
 
 **A warm, paper-like shared pinboard for small teams — as a DeepSeek Harness panel plugin.**
 
@@ -14,27 +14,27 @@ Copy the prompt below into an AI agent that can work on your computer — DeepSe
 
 > **Install prompt (copy everything in this block)**
 >
-> Please install the DeepSeek Harness plugin **Ding Wall** (`dsh-ding-wall`) from https://github.com/Into-the-Numind/dsh-ding-wall.
+> Please install the DeepSeek Harness plugin **Ding Wall** (`dsh-ding-wall`) from https://github.com/Into-the-Numind/Ding-Wall.
 >
 > 1. Clone the repository into a permanent directory, for example:
->    `git clone https://github.com/Into-the-Numind/dsh-ding-wall.git ~/dsh-plugins/dsh-ding-wall`
+>    `git clone https://github.com/Into-the-Numind/Ding-Wall.git ~/dsh-plugins/dsh-ding-wall`
 >    Keep this directory — DeepSeek Harness loads the plugin from it. Do not delete or move it afterwards.
 > 2. Install that directory as a plugin bundle in DeepSeek Harness:
 >    - If you have the `plugin_manager` tool: call `install_bundle` with `target` set to the **absolute path of the cloned directory** (the folder containing `package.json`), then make sure the bundle is enabled.
 >    - Otherwise use Plugin Manager → Add plugin → local folder, or `dsh plugin --profile <profile> add link:<absolute-path>` if this DSH build provides that CLI.
 > 3. Confirm the bundle `dsh-ding-wall` is installed and enabled. Then tell me to **fully quit and restart DeepSeek Harness** — the host half of the plugin loads on restart (a page refresh is not enough).
-> 4. After my restart, verify with me that a red pin icon labeled **“钉一下 / Ding Wall”** appears in the sidebar and that opening it shows the wall.
+> 4. After my restart, verify with me that a red pin icon labeled **“钉一钉 / Ding Wall”** appears in the sidebar and that opening it shows the wall.
 >
 > Do not publish anything or modify other plugins. Report the commands you ran, any warnings, and what I should check.
 
 ### Even shorter
 
-> Install the DeepSeek Harness plugin at **https://github.com/Into-the-Numind/dsh-ding-wall** — clone it, add it as a local plugin bundle, then tell me to fully restart DeepSeek Harness.
+> Install the DeepSeek Harness plugin at **https://github.com/Into-the-Numind/Ding-Wall** — clone it, add it as a local plugin bundle, then tell me to fully restart DeepSeek Harness.
 
 ### What “done” looks like
 
 - `dsh-ding-wall` appears as an installed plugin bundle and is enabled;
-- after a **full app restart**, the sidebar shows a red pin **钉一下**;
+- after a **full app restart**, the sidebar shows a red pin **钉一钉**;
 - opening it shows the paper wall, and the first visit asks you to claim a team card;
 - no network requests are made in the default local mode.
 
@@ -77,14 +77,14 @@ Copy the prompt below into an AI agent that can work on your computer — DeepSe
 1. Clone the repo somewhere permanent:
 
    ```bash
-   git clone https://github.com/Into-the-Numind/dsh-ding-wall.git ~/dsh-plugins/dsh-ding-wall
+   git clone https://github.com/Into-the-Numind/Ding-Wall.git ~/dsh-plugins/dsh-ding-wall
    ```
 
 2. In DeepSeek Harness, open **Plugins → Add plugin → local directory** and select the cloned folder (the one containing `package.json`). Enable the plugin.
 
 3. **Fully quit and restart DeepSeek Harness.** (Host-side plugin code is loaded at startup; a page refresh only reloads the UI.)
 
-4. Click the red pin **钉一下** in the sidebar. On first open, claim your team card.
+4. Click the red pin **钉一钉** in the sidebar. On first open, claim your team card.
 
 ### Update
 

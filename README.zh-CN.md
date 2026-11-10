@@ -1,4 +1,4 @@
-# 钉一下 · Ding Wall
+# 钉一钉 · Ding Wall
 
 **给三个人的暖纸共享信息墙 —— 一个 DeepSeek Harness 面板插件。**
 
@@ -6,7 +6,7 @@
 
 [English](README.md) · [简体中文](README.zh-CN.md) · [让 Agent 安装](#让-agent-安装) · [手动安装](#手动安装) · [截图](#截图) · [功能](#功能)
 
-![钉一下面板](screenshots/panel-wide.png)
+![钉一钉面板](screenshots/panel-wide.png)
 
 ## 让 Agent 安装
 
@@ -14,27 +14,27 @@
 
 > **安装提示词（复制这一段）**
 >
-> 请帮我安装 DeepSeek Harness 插件 **钉一下**（`dsh-ding-wall`），仓库地址：https://github.com/Into-the-Numind/dsh-ding-wall
+> 请帮我安装 DeepSeek Harness 插件 **钉一钉**（`dsh-ding-wall`），仓库地址：https://github.com/Into-the-Numind/Ding-Wall
 >
 > 1. 把仓库克隆到一个**固定目录**，例如：
->    `git clone https://github.com/Into-the-Numind/dsh-ding-wall.git ~/dsh-plugins/dsh-ding-wall`
+>    `git clone https://github.com/Into-the-Numind/Ding-Wall.git ~/dsh-plugins/dsh-ding-wall`
 >    这个目录要保留，DeepSeek Harness 会从它加载插件，安装后不要删除或移动。
 > 2. 在这个 DeepSeek Harness 里把该目录安装为插件包：
 >    - 如果你有 `plugin_manager` 工具：调用 `install_bundle`，`target` 设为克隆下来的目录**绝对路径**（包含 `package.json` 的那一层），并确保它已启用；
 >    - 否则让我从「插件管理器 → 添加插件 → 本地目录」安装，或者在当前 DSH 版本支持 CLI 时执行 `dsh plugin --profile <profile> add link:<绝对路径>`。
 > 3. 确认插件包 `dsh-ding-wall` 已安装并启用。然后提醒我**完全退出并重启 DeepSeek Harness**——宿主侧代码在重启时加载，刷新页面不够。
-> 4. 重启后和我一起确认：侧栏出现红色图钉「钉一下」，点开能看到信息墙。
+> 4. 重启后和我一起确认：侧栏出现红色图钉「钉一钉」，点开能看到信息墙。
 >
 > 不要发布任何内容，也不要修改其他插件。最后把执行过的命令、警告和需要我检查的事项告诉我。
 
 ### 更短的一句话
 
-> 安装 DeepSeek Harness 插件 **https://github.com/Into-the-Numind/dsh-ding-wall** —— 克隆到固定目录、作为本地插件包安装，然后提醒我完全重启 DeepSeek Harness。
+> 安装 DeepSeek Harness 插件 **https://github.com/Into-the-Numind/Ding-Wall** —— 克隆到固定目录、作为本地插件包安装，然后提醒我完全重启 DeepSeek Harness。
 
 ### 怎么算装好了
 
 - `dsh-ding-wall` 出现在插件列表中，且处于启用状态；
-- **完全重启应用**后，侧栏出现红色图钉「钉一下」；
+- **完全重启应用**后，侧栏出现红色图钉「钉一钉」；
 - 点开能看到暖纸信息墙，首次进入会要求认领一张团队名片；
 - 默认本地模式不会发起任何网络请求。
 
@@ -77,14 +77,14 @@
 1. 克隆到一个固定目录：
 
    ```bash
-   git clone https://github.com/Into-the-Numind/dsh-ding-wall.git ~/dsh-plugins/dsh-ding-wall
+   git clone https://github.com/Into-the-Numind/Ding-Wall.git ~/dsh-plugins/dsh-ding-wall
    ```
 
 2. 打开 DeepSeek Harness 的**插件 → 添加插件 → 本地目录**，选择克隆下来的文件夹（包含 `package.json` 的那一层），启用插件。
 
 3. **完全退出并重启 DeepSeek Harness。**（宿主侧插件代码在启动时加载；刷新页面只会重载 UI。）
 
-4. 点击侧栏红色图钉「钉一下」。首次打开时认领你的团队名片。
+4. 点击侧栏红色图钉「钉一钉」。首次打开时认领你的团队名片。
 
 ### 更新
 
@@ -109,7 +109,7 @@ git pull
 
 ## 共享团队模式（可选）
 
-钉一下也可以作为一个小团队共享墙的界面，后端可以自托管。在 Harness 的 profile 补丁里配置——访问码只存在宿主侧，不会下发浏览器：
+钉一钉也可以作为一个小团队共享墙的界面，后端可以自托管。在 Harness 的 profile 补丁里配置——访问码只存在宿主侧，不会下发浏览器：
 
 ```yaml
 - id: ding-wall
