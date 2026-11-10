@@ -12,25 +12,9 @@ The plugin connects to the team wall by default: enter the team access code once
 
 ## Install with an agent
 
-Copy the prompt below into an AI agent that can work on your computer — DeepSeek Harness, Claude Code, Codex, or any agent with shell/file access. It handles the install end to end.
+If you'd like an agent to install it, send the one-liner below to an AI agent that can work on your computer — DeepSeek Harness, Claude Code, Codex, or any agent with shell/file access:
 
-> **Install prompt (copy everything in this block)**
->
-> Please install the DeepSeek Harness plugin **Ding Wall** (`dsh-ding-wall`) from https://github.com/Into-the-Numind/Ding-Wall.
->
-> 1. Clone the repository into a permanent directory, for example:
->    `git clone https://github.com/Into-the-Numind/Ding-Wall.git ~/dsh-plugins/dsh-ding-wall`
->    Keep this directory — DeepSeek Harness loads the plugin from it. Do not delete or move it afterwards.
->    On Windows (PowerShell), replace `~` with `$env:USERPROFILE`, e.g. `$env:USERPROFILE\dsh-plugins\dsh-ding-wall`; use PowerShell equivalents for file commands.
-> 2. Install that directory as a plugin bundle in DeepSeek Harness:
->    - If you have the `plugin_manager` tool: call `install_bundle` with `target` set to the **absolute path of the cloned directory** (the folder containing `package.json`), then make sure the bundle is enabled.
->    - Otherwise use Plugin Manager → Add plugin → local folder, or `dsh plugin --profile <profile> add link:<absolute-path>` if this DSH build provides that CLI.
-> 3. Confirm the bundle `dsh-ding-wall` is installed and enabled. Then tell me to **fully quit and restart DeepSeek Harness** — the host half of the plugin loads on restart (a page refresh is not enough).
-> 4. After my restart, verify with me that a red pin icon labeled **“钉一钉 / Ding Wall”** appears in the sidebar. On first open the panel will ask for a **team access code**; remind me to enter it (I will provide the code). After connecting, the team wall content should appear.
->
-> Do not publish anything or modify other plugins. Report the commands you ran, any warnings, and what I should check.
-
-### Even shorter
+### One-line install
 
 > Install the DeepSeek Harness plugin at **https://github.com/Into-the-Numind/Ding-Wall** — clone it, add it as a local plugin bundle, tell me to fully restart DeepSeek Harness, then remind me to enter the team access code in the panel.
 

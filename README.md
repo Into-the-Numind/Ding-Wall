@@ -12,25 +12,9 @@
 
 ## 让 Agent 安装
 
-把下面这段提示词发给一个能在你电脑上执行操作的 AI Agent（DeepSeek Harness、Claude Code、Codex，或任何有 shell / 文件权限的 Agent），它会帮你从头装好。
+如果你想让 Agent 帮你安装，把下面这句话发给一个能在你电脑上执行操作的 AI Agent（DeepSeek Harness、Claude Code、Codex，或任何有 shell / 文件权限的 Agent）：
 
-> **安装提示词（复制这一段）**
->
-> 请帮我安装 DeepSeek Harness 插件 **钉一钉**（`dsh-ding-wall`），仓库地址：https://github.com/Into-the-Numind/Ding-Wall
->
-> 1. 把仓库克隆到一个**固定目录**，例如：
->    `git clone https://github.com/Into-the-Numind/Ding-Wall.git ~/dsh-plugins/dsh-ding-wall`
->    这个目录要保留，DeepSeek Harness 会从它加载插件，安装后不要删除或移动。
->    Windows（PowerShell）把 `~` 换成 `$env:USERPROFILE`，例如 `$env:USERPROFILE\dsh-plugins\dsh-ding-wall`；不要照抄 Unix 的 `cp`/`readlink`。
-> 2. 在这个 DeepSeek Harness 里把该目录安装为插件包：
->    - 如果你有 `plugin_manager` 工具：调用 `install_bundle`，`target` 设为克隆下来的目录**绝对路径**（包含 `package.json` 的那一层），并确保它已启用；
->    - 否则让我从「插件管理器 → 添加插件 → 本地目录」安装，或者在当前 DSH 版本支持 CLI 时执行 `dsh plugin --profile <profile> add link:<绝对路径>`。
-> 3. 确认插件包 `dsh-ding-wall` 已安装并启用。然后提醒我**完全退出并重启 DeepSeek Harness**——宿主侧代码在重启时加载，刷新页面不够。
-> 4. 重启后和我一起确认：侧栏出现红色图钉「钉一钉」；点开面板，首次会要求输入**团队访问码**，提醒我输入（访问码由我提供），连接成功后应看到团队墙内容。
->
-> 不要发布任何内容，也不要修改其他插件。最后把执行过的命令、警告和需要我检查的事项告诉我。
-
-### 更短的一句话
+### 一句话安装
 
 > 安装 DeepSeek Harness 插件 **https://github.com/Into-the-Numind/Ding-Wall** —— 克隆到固定目录、作为本地插件包安装，提醒我完全重启 DeepSeek Harness，然后提醒我在面板里输入团队访问码。
 
