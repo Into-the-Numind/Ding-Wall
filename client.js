@@ -1295,6 +1295,7 @@ window.__ModuleLoader__.load({
   margin: 6px 0 8px;
   font-size: 12.5px;
   line-height: 1.62;
+  white-space: pre-wrap;
   overflow-wrap: anywhere;
 }
 .dw-todo__foot {
@@ -2078,6 +2079,7 @@ window.__ModuleLoader__.load({
   font-weight: 600;
   line-height: 1.45;
   overflow-wrap: anywhere;
+  white-space: pre-wrap;
 }
 .dw-paper__byline {
   margin-top: 6px;

@@ -119,6 +119,10 @@ test('样式：复原网页版的暖纸设计系统（纸感调色板 / 宋体 /
   assert.ok(SOURCE.includes('repeating-linear-gradient'), '必须带纸纤维/格线纹理');
   assert.ok(SOURCE.includes('.dw-note--tone-'), '便签必须有多种纸色');
   assert.ok(SOURCE.includes('.dw-fab'), '必须保留原版红色浮动「钉一张」按钮');
+  for (const name of ['dw-note__text', 'dw-todo__text', 'dw-letter__text']) {
+    const rule = (SOURCE.match(new RegExp(`(?:^|\\n)\\.${name} \\{[\\s\\S]*?\\}`)) || [''])[0];
+    assert.match(rule, /white-space:\s*pre-wrap/, `${name} 必须保留用户输入的换行`);
+  }
   assert.ok(SOURCE.includes('linear-gradient(rgba(47, 83, 117, 0.13) 1px'), '团队心律必须是方格纸底');
   assert.ok(SOURCE.includes('data:image/svg+xml'), '纸纹必须是本地内联资源，不能外链');
 });
