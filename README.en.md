@@ -36,7 +36,7 @@ Copy the prompt below into an AI agent that can work on your computer — DeepSe
 - `dsh-ding-wall` appears as an installed plugin bundle and is enabled;
 - after a **full app restart**, the sidebar shows a red pin **钉一钉**;
 - opening it shows the paper wall, and the first visit asks you to claim a team card;
-- no network requests are made in the default local mode.
+- the default install is a **local wall**: no network requests, and each computer has its own wall. To join a team wall, see [Join an existing team wall](#join-an-existing-team-wall).
 
 > If the plugin manager in your DSH build cannot install a local directory, install it the same way you install any other local plugin bundle and point it at the cloned folder. If the icon does not appear, make sure you fully restarted Harness, not just reloaded the window.
 
@@ -126,6 +126,18 @@ Ding Wall can also be the UI for a small shared wall served by a compatible self
 ```
 
 The wall server itself is not included in this repository; the plugin speaks a small JSON + SSE API. Without `serverUrl`, everything runs locally.
+
+### Join an existing team wall
+
+If someone on your team has already set up a shared wall, **you do not need to reinstall the plugin**: ask them for a filled config block (`serverUrl`, `serverToken`, and `serverCa` for self-signed deployments), append it to your profile patch, and fully restart Harness. The panel footer will switch from “Local wall” to “Shared wall”.
+
+You can hand this to your agent (replace the config with the one your team gave you):
+
+```text
+My Ding Wall plugin is in local-wall mode and cannot see the team wall. Please append the config below to the end of ~/.dsh/profiles/<profile>/cordis.patch.yml (keep the YAML indentation), then tell me to fully quit and restart DeepSeek Harness. After the restart, verify that the panel footer says "Shared wall":
+
+<paste the YAML config from your team here>
+```
 
 ## Keyboard shortcuts
 
