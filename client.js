@@ -4005,13 +4005,8 @@ window.__ModuleLoader__.load({
             if (composer && (event.metaKey || event.ctrlKey) && event.key === 'Enter') {
               event.preventDefault();
               void submitRef.current?.();
-              return;
             }
-            if (composer && !event.metaKey && !event.ctrlKey && !event.altKey && ['1', '2', '3'].includes(event.key)) {
-              event.preventDefault();
-              const types = ['idea', 'todo', 'opinion'];
-              setComposer((current) => (current && !composerBusy ? { ...current, type: types[Number(event.key) - 1] } : current));
-            }
+            // 输入框内不绑定任何普通字符快捷键（尤其数字 1/2/3），否则会吞掉输入。
             return;
           }
           if (event.key === 'n' || event.key === 'N') {

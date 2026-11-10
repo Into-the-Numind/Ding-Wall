@@ -132,6 +132,14 @@ test('产物纯净：无 import、无 Node/平台包、无外链请求', () => {
   assert.ok(!/document\.body/.test(SOURCE), '不能在组件外挂 DOM 到 body');
 });
 
+test('键盘：输入框内不绑定数字 1/2/3 快捷键', () => {
+  // 回归测试：弹层打开时曾把 1/2/3 绑成切换标签的快捷键，导致输入框里打不出数字。
+  assert.doesNotMatch(SOURCE, /\[\s*['"]1['"]\s*,\s*['"]2['"]\s*,\s*['"]3['"]\s*\]/);
+  assert.doesNotMatch(SOURCE, /event\.key\s*===\s*['"](?:1|2|3)['"]/);
+  assert.doesNotMatch(SOURCE, /Digit[123]/);
+  assert.match(SOURCE, /isTypingTarget\(event\.target\)/, '输入框判定仍要保留，避免其他单字母快捷键误触');
+});
+
 test('manifest 与展示资源：补丁、client 导出、双语 meta、图标齐备', () => {
   assert.equal(PKG.name, 'dsh-ding-wall');
   assert.equal(PKG.type, 'module');
