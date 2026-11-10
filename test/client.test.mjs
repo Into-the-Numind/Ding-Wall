@@ -104,7 +104,7 @@ test('语言词典：中英词典齐备，覆盖主要界面文案', () => {
   const { dictionaries } = applyPlugin();
   const dict = dictionaries['dsh-ding-wall'];
   assert.ok(dict && dict.zh && dict.en);
-  for (const key of ['brand', 'ideas', 'todos', 'echo', 'pulse', 'newPin', 'morning', 'identityTitle', 'emptyIdeasTitle', 'submit', 'anonymousNote']) {
+  for (const key of ['brand', 'ideas', 'todos', 'echo', 'pulse', 'newPin', 'morning', 'identityTitle', 'emptyIdeasTitle', 'submit', 'anonymousNote', 'connectTitle', 'accessCodeLabel', 'connectAction', 'noAccessCode']) {
     assert.equal(typeof dict.zh[key], 'string', `zh.${key}`);
     assert.equal(typeof dict.en[key], 'string', `en.${key}`);
   }

@@ -5,6 +5,7 @@ import fs from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import { apply } from '../lib/index.js';
+import { TEAM_SERVER_CA, TEAM_SERVER_URL, resolveConfig } from '../lib/config.js';
 
 const PREFIX = '/api/ding-wall';
 
@@ -87,6 +88,17 @@ function json(base, pathname, { method = 'GET', body, headers } = {}) {
     body: body === undefined ? undefined : JSON.stringify(body),
   });
 }
+
+test('config：默认团队墙自动使用随包内置的公开 CA', () => {
+  const cfg = resolveConfig({ serverUrl: TEAM_SERVER_URL });
+  assert.equal(cfg.mode, 'shared');
+  assert.equal(cfg.serverCa, TEAM_SERVER_CA);
+  assert.match(cfg.serverCa, /BEGIN CERTIFICATE/);
+
+  const local = resolveConfig({ serverUrl: '' });
+  assert.equal(local.mode, 'local');
+  assert.equal(local.serverCa, '');
+});
 
 test('config：本地模式声明、不暴露本机路径', async () => {
   await withLocalPlugin('config', async ({ base }) => {
@@ -259,13 +271,13 @@ test('共享模式：把请求与方法/请求体/SSE 原样代理到墙服务',
   await new Promise((resolve) => upstream.listen(0, '127.0.0.1', resolve));
   const upstreamBase = `http://127.0.0.1:${upstream.address().port}`;
 
-  const plugin = mountPlugin({ serverUrl: upstreamBase });
+  const plugin = mountPlugin({ serverUrl: upstreamBase, serverToken: 'team-code-123' });
   const { server, base } = await listen((req, res) => plugin.route.handler(req, res));
   try {
     const config = await (await json(base, `${PREFIX}/config`)).json();
     assert.equal(config.mode, 'shared');
     assert.equal(config.shared, true);
-    assert.equal(config.secured, false);
+    assert.equal(config.secured, true);
 
     const state = await (await json(base, `${PREFIX}/state`)).json();
     assert.equal(state.ok, true);
@@ -277,7 +289,7 @@ test('共享模式：把请求与方法/请求体/SSE 原样代理到墙服务',
     const memberPayload = await member.json();
     assert.equal(memberPayload.member.name, '阿岸');
     assert.ok(hits.some((hit) => hit.method === 'POST' && hit.url === '/api/members'));
-    assert.ok(hits.every((hit) => hit.auth === undefined), '未配置访问码时不应发送 Authorization');
+    assert.ok(hits.every((hit) => hit.auth === 'Bearer team-code-123'), '已连接时应携带宿主侧访问码');
 
     const controller = new AbortController();
     const sse = await fetch(`${base}${PREFIX}/events`, { signal: controller.signal, headers: { accept: 'text/event-stream' } });
@@ -334,8 +346,83 @@ test('共享模式：serverToken 由宿主附加到上游（含 SSE），且不�
   }
 });
 
+test('共享模式：未连接时提示输入访问码，校验通过后保存到本机并自动恢复', async () => {
+  const dataDir = await fs.mkdtemp(path.join(os.tmpdir(), 'ding-wall-connect-'));
+  const hits = [];
+  const upstream = http.createServer((req, res) => {
+    hits.push({ url: req.url, auth: req.headers.authorization });
+    const allowed = req.headers.authorization === 'Bearer good-code';
+    res.writeHead(allowed ? 200 : 401, { 'content-type': 'application/json' });
+    res.end(JSON.stringify(allowed ? { ok: true } : { error: { code: 'unauthorized' } }));
+  });
+  await new Promise((resolve) => upstream.listen(0, '127.0.0.1', resolve));
+  const upstreamBase = `http://127.0.0.1:${upstream.address().port}`;
+
+  const plugin = mountPlugin({ serverUrl: upstreamBase, stateDir: dataDir });
+  const { server, base } = await listen((req, res) => plugin.route.handler(req, res));
+  const connectionPath = path.join(dataDir, 'connection.json');
+  try {
+    const before = await (await json(base, `${PREFIX}/config`)).json();
+    assert.equal(before.shared, true);
+    assert.equal(before.secured, false);
+    assert.equal(before.needsConnect, true);
+    assert.equal(before.serverHost, new URL(upstreamBase).host);
+
+    const blocked = await json(base, `${PREFIX}/state`);
+    assert.equal(blocked.status, 401);
+    assert.equal((await blocked.json()).error.code, 'connect_required');
+
+    const wrong = await json(base, `${PREFIX}/connect`, { method: 'POST', body: { code: 'bad-code' } });
+    assert.equal(wrong.status, 401);
+    assert.equal((await wrong.json()).error.code, 'invalid_access_code');
+    await assert.rejects(fs.stat(connectionPath));
+
+    const connected = await json(base, `${PREFIX}/connect`, { method: 'POST', body: { code: 'good-code' } });
+    assert.equal(connected.status, 200);
+    const connectedConfig = await connected.json();
+    assert.equal(connectedConfig.secured, true);
+    assert.equal(connectedConfig.needsConnect, false);
+    assert.ok(!JSON.stringify(connectedConfig).includes('good-code'), '/config 不能泄露访问码');
+
+    const file = await fs.stat(connectionPath);
+    assert.equal(file.mode & 0o777, 0o600, '连接状态文件必须仅本机用户可读');
+    assert.equal(JSON.parse(await fs.readFile(connectionPath, 'utf8')).serverToken, 'good-code');
+
+    const state = await json(base, `${PREFIX}/state`);
+    assert.equal(state.status, 200);
+    assert.ok(hits.some((hit) => hit.url === '/api/state' && hit.auth === 'Bearer good-code'));
+  } finally {
+    await closeServer(server);
+    await plugin.close();
+  }
+
+  // 模拟重启：同一台机器、没有 profile 里的 token，也能从连接文件恢复
+  const restarted = mountPlugin({ serverUrl: upstreamBase, stateDir: dataDir });
+  const second = await listen((req, res) => restarted.route.handler(req, res));
+  try {
+    const config = await (await json(second.base, `${PREFIX}/config`)).json();
+    assert.equal(config.secured, true);
+    assert.equal(config.needsConnect, false);
+    const state = await json(second.base, `${PREFIX}/state`);
+    assert.equal(state.status, 200);
+
+    const disconnected = await json(second.base, `${PREFIX}/disconnect`, { method: 'POST' });
+    assert.equal(disconnected.status, 200);
+    assert.equal((await disconnected.json()).needsConnect, true);
+    await assert.rejects(fs.stat(connectionPath));
+    const after = await json(second.base, `${PREFIX}/state`);
+    assert.equal(after.status, 401);
+    assert.equal((await after.json()).error.code, 'connect_required');
+  } finally {
+    await closeServer(second.server);
+    await restarted.close();
+    await closeServer(upstream);
+    await fs.rm(dataDir, { recursive: true, force: true });
+  }
+});
+
 test('共享模式：墙服务不可达时返回 502 中文提示', async () => {
-  const plugin = mountPlugin({ serverUrl: 'http://127.0.0.1:9', timeoutMs: 800 });
+  const plugin = mountPlugin({ serverUrl: 'http://127.0.0.1:9', serverToken: 'team-code-123', timeoutMs: 800 });
   const { server, base } = await listen((req, res) => plugin.route.handler(req, res));
   try {
     const response = await json(base, `${PREFIX}/state`);

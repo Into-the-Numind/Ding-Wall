@@ -4,6 +4,8 @@
 
 Ideas pinned as sticky notes, to-dos as index cards, anonymous feedback in a kraft-paper mailbox. Real-time sync for a small team, a hand-drawn “team pulse”, and a morning-paper mode for stand-ups.
 
+The plugin connects to the team wall by default: enter the team access code once on first open. You can switch back to a local-only wall if you prefer.
+
 **English** · [简体中文](README.md) · [Install with an agent](#install-with-an-agent) · [Manual install](#manual-install) · [Screenshots](#screenshots) · [Features](#features)
 
 ![Ding Wall panel](screenshots/panel-wide.png)
@@ -23,20 +25,21 @@ Copy the prompt below into an AI agent that can work on your computer — DeepSe
 >    - If you have the `plugin_manager` tool: call `install_bundle` with `target` set to the **absolute path of the cloned directory** (the folder containing `package.json`), then make sure the bundle is enabled.
 >    - Otherwise use Plugin Manager → Add plugin → local folder, or `dsh plugin --profile <profile> add link:<absolute-path>` if this DSH build provides that CLI.
 > 3. Confirm the bundle `dsh-ding-wall` is installed and enabled. Then tell me to **fully quit and restart DeepSeek Harness** — the host half of the plugin loads on restart (a page refresh is not enough).
-> 4. After my restart, verify with me that a red pin icon labeled **“钉一钉 / Ding Wall”** appears in the sidebar and that opening it shows the wall.
+> 4. After my restart, verify with me that a red pin icon labeled **“钉一钉 / Ding Wall”** appears in the sidebar. On first open the panel will ask for a **team access code**; remind me to enter it (I will provide the code). After connecting, the team wall content should appear.
 >
 > Do not publish anything or modify other plugins. Report the commands you ran, any warnings, and what I should check.
 
 ### Even shorter
 
-> Install the DeepSeek Harness plugin at **https://github.com/Into-the-Numind/Ding-Wall** — clone it, add it as a local plugin bundle, then tell me to fully restart DeepSeek Harness.
+> Install the DeepSeek Harness plugin at **https://github.com/Into-the-Numind/Ding-Wall** — clone it, add it as a local plugin bundle, tell me to fully restart DeepSeek Harness, then remind me to enter the team access code in the panel.
 
 ### What “done” looks like
 
 - `dsh-ding-wall` appears as an installed plugin bundle and is enabled;
 - after a **full app restart**, the sidebar shows a red pin **钉一钉**;
-- opening it shows the paper wall, and the first visit asks you to claim a team card;
-- the default install is a **local wall**: no network requests, and each computer has its own wall. To join a team wall, see [Join an existing team wall](#join-an-existing-team-wall).
+- on first open the panel asks for a **team access code**; after connecting, the footer shows “Shared wall”;
+- after that, the first visit asks you to claim a team card and the team content appears;
+- prefer a local wall? Set `serverUrl` to empty (see [Local-only wall](#local-only-wall-optional)).
 
 > If the plugin manager in your DSH build cannot install a local directory, install it the same way you install any other local plugin bundle and point it at the cloned folder. If the icon does not appear, make sure you fully restarted Harness, not just reloaded the window.
 
@@ -54,6 +57,10 @@ Copy the prompt below into an AI agent that can work on your computer — DeepSe
 | --- | --- |
 | ![Narrow panel](screenshots/panel-narrow.png) | ![Team pulse](screenshots/team-pulse.png) |
 
+| Connect to the team wall |
+| --- |
+| ![Connect gate](screenshots/connect.png) |
+
 ## Features
 
 - **Ideas as sticky notes** — one click to pin a thought; drag the wall into a calm paper workspace.
@@ -62,7 +69,7 @@ Copy the prompt below into an AI agent that can work on your computer — DeepSe
 - **Real-time team pulse** — presence, activity bars and a hand-drawn weekly rhythm.
 - **Morning paper** — a broadsheet view for stand-ups, refreshed daily.
 - **Warm paper aesthetic** — cream paper, Songti display type, pins, tape, rubber stamps and grain, restored from the original web design.
-- **Local-first** — the default mode is completely local (`$DSH_HOME/ding-wall/wall.json`); no account, no cloud.
+- **Team wall by default** — installation connects to the team wall; enter the access code once and it stays on this machine. A local-only wall is still available.
 - **Bilingual UI** — 简体中文 / English, following the Harness locale.
 
 ## Requirements & compatibility
@@ -84,7 +91,7 @@ Copy the prompt below into an AI agent that can work on your computer — DeepSe
 
 3. **Fully quit and restart DeepSeek Harness.** (Host-side plugin code is loaded at startup; a page refresh only reloads the UI.)
 
-4. Click the red pin **钉一钉** in the sidebar. On first open, claim your team card.
+4. Click the red pin **钉一钉** in the sidebar. On first open, enter the team access code, then claim your team card.
 
 ### Update
 
@@ -93,7 +100,7 @@ cd ~/dsh-plugins/dsh-ding-wall
 git pull
 ```
 
-Then fully restart Harness. If you installed a snapshot instead of a git checkout, reinstall that folder.
+Then fully restart Harness. If the panel still says “Local wall” after updating, reinstall this folder in Plugin Manager (so the new bundle defaults apply) or check whether your profile patch overrides `serverUrl`.
 
 ### Uninstall
 
@@ -101,43 +108,47 @@ Remove the plugin in Plugin Manager. Your wall data stays in `$DSH_HOME/ding-wal
 
 ## Data, privacy & network
 
-- **Local-first:** data is stored in `$DSH_HOME/ding-wall/wall.json` and never leaves the machine in the default local mode.
+- **Team wall by default:** wall data lives on the team's self-hosted shared service; team members share one wall.
+- **Access code stays local:** after the first connection it is stored in `$DSH_HOME/ding-wall/connection.json` (mode 600), never sent to the browser and never committed to this repo.
 - **Anonymous opinions:** no author ID is persisted for mailbox entries.
 - **No telemetry, no analytics, no CDN calls.**
 - The host plugin runs with your user permissions — like any Harness plugin, read the source before installing if you need to.
-- Only if you explicitly configure a shared team server does the host make network requests to that URL.
+- In local-only mode (`serverUrl` empty), data stays in `$DSH_HOME/ding-wall/wall.json` on this machine.
 
-## Shared team mode (optional)
+## Team wall (default) and local-only mode
 
-Ding Wall can also be the UI for a small shared wall served by a compatible self-hosted backend. Configure it in your Harness profile patch — the access token stays host-side and is never sent to the browser:
+The plugin points at the team wall (`https://139.155.129.13`) by default. On first open, enter the team access code once — it is stored only on this machine (`$DSH_HOME/ding-wall/connection.json`, mode 600), never in the repo or the browser.
+
+### Local-only wall (optional)
+
+To use the wall on this computer only, without the team service, set `serverUrl` to empty in your profile patch:
+
+```yaml
+- id: ding-wall
+  name: dsh-ding-wall
+  config:
+    serverUrl: ""
+```
+
+Data then lives in `$DSH_HOME/ding-wall/wall.json` and no network requests are made.
+
+### Point at another wall service (advanced)
+
+The wall server itself is not included in this repository; the plugin speaks a small JSON + SSE API. To use a self-hosted wall, override `serverUrl` / `serverToken` (and `serverCa` for self-signed deployments):
 
 ```yaml
 - id: ding-wall
   name: dsh-ding-wall
   config:
     serverUrl: "https://your-wall.example.com"
-    # optional: shared access code, attached by the host proxy as a Bearer token
     serverToken: "your-team-access-code"
-    # optional: pin a self-signed CA for deployments without a public certificate
     # serverCa: |
     #   -----BEGIN CERTIFICATE-----
     #   ...
     #   -----END CERTIFICATE-----
 ```
 
-The wall server itself is not included in this repository; the plugin speaks a small JSON + SSE API. Without `serverUrl`, everything runs locally.
-
-### Join an existing team wall
-
-If someone on your team has already set up a shared wall, **you do not need to reinstall the plugin**: ask them for a filled config block (`serverUrl`, `serverToken`, and `serverCa` for self-signed deployments), append it to your profile patch, and fully restart Harness. The panel footer will switch from “Local wall” to “Shared wall”.
-
-You can hand this to your agent (replace the config with the one your team gave you):
-
-```text
-My Ding Wall plugin is in local-wall mode and cannot see the team wall. Please append the config below to the end of ~/.dsh/profiles/<profile>/cordis.patch.yml (keep the YAML indentation), then tell me to fully quit and restart DeepSeek Harness. After the restart, verify that the panel footer says "Shared wall":
-
-<paste the YAML config from your team here>
-```
+Teammates joining the default team wall only need to install/update the plugin, fully restart Harness, and enter the access code in the panel — no manual config editing.
 
 ## Keyboard shortcuts
 

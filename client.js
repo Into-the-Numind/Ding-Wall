@@ -127,6 +127,17 @@ window.__ModuleLoader__.load({
       localMode: '本机墙',
       sharedHint: '连着团队墙服务',
       localHint: '数据只存在这台设备',
+      connectKicker: '团队墙 · 连接',
+      connectTitle: '连接到团队墙',
+      connectDesc: '输入团队访问码，加入这面共享墙。访问码只保存在本机，不会显示在界面上。',
+      accessCodeLabel: '团队访问码',
+      accessCodePlaceholder: '粘贴团队访问码',
+      accessCodeRequired: '请先输入团队访问码。',
+      connectAction: '连接',
+      connecting: '连接中…',
+      connectedToast: '已连上团队墙',
+      connectTarget: '目标：',
+      noAccessCode: '没有访问码？找团队管理员要。',
       noMembers: '墙上只有你',
       identityHint: '点右上角改名片',
       morningTitle: '钉一钉 · 晨报',
@@ -264,6 +275,17 @@ window.__ModuleLoader__.load({
       localMode: 'Local wall',
       sharedHint: 'Connected to the team wall service',
       localHint: 'Stored on this device only',
+      connectKicker: 'TEAM WALL · CONNECT',
+      connectTitle: 'Connect to the team wall',
+      connectDesc: 'Enter the team access code to join this shared wall. The code stays on this computer and is never shown in the UI.',
+      accessCodeLabel: 'Team access code',
+      accessCodePlaceholder: 'Paste the team access code',
+      accessCodeRequired: 'Enter the team access code first.',
+      connectAction: 'Connect',
+      connecting: 'Connecting…',
+      connectedToast: 'Connected to the team wall',
+      connectTarget: 'Target: ',
+      noAccessCode: 'No access code? Ask your team admin.',
       noMembers: 'Only you here',
       identityHint: 'Click your card to edit',
       morningTitle: 'Ding Wall · Morning Paper',
@@ -3400,6 +3422,66 @@ window.__ModuleLoader__.load({
       );
     }
 
+    /* ------------------------------------------------------------ 连接团队墙 */
+    function ConnectionSheet({ t, lang, serverHost, code, busy, error, onCode, onSubmit }) {
+      return h(
+        React.Fragment,
+        null,
+        h('div', { className: 'dw-scrim', 'aria-hidden': 'true' }),
+        h(
+          'div',
+          { className: 'dw-card dw-in', role: 'dialog', 'aria-modal': 'true', 'aria-labelledby': 'dw-connect-title' },
+          h(
+            'div',
+            { className: 'dw-card__head' },
+            h(
+              'div',
+              null,
+              h('p', { className: 'dw-card__kicker' }, t('connectKicker')),
+              h('h2', { className: 'dw-card__title', id: 'dw-connect-title' }, t('connectTitle')),
+            ),
+            null,
+          ),
+          h('p', { className: 'dw-card__desc' }, t('connectDesc')),
+          serverHost
+            ? h('p', { className: 'dw-hint', style: { marginTop: 6 } }, `${t('connectTarget')}${serverHost}`)
+            : null,
+          h(
+            'div',
+            { className: 'dw-field', style: { marginTop: 18 } },
+            h('label', { className: 'dw-field__label', htmlFor: 'dw-access-code' }, t('accessCodeLabel')),
+            h('input', {
+              id: 'dw-access-code',
+              className: 'dw-input',
+              type: 'password',
+              value: code,
+              autoFocus: true,
+              autoComplete: 'current-password',
+              placeholder: t('accessCodePlaceholder'),
+              onChange: (event) => onCode(event.target.value),
+              onKeyDown: (event) => {
+                if (event.key === 'Enter') {
+                  event.preventDefault();
+                  onSubmit();
+                }
+              },
+            }),
+          ),
+          error ? h('p', { className: 'dw-error', style: { marginTop: 8 } }, error) : null,
+          h(
+            'div',
+            { className: 'dw-form-foot' },
+            h('span', { className: 'dw-hint' }, t('noAccessCode')),
+            h(
+              'button',
+              { type: 'button', className: 'dw-btn dw-btn--primary', disabled: busy, onClick: onSubmit },
+              busy ? t('connecting') : t('connectAction'),
+            ),
+          ),
+        ),
+      );
+    }
+
     /* ------------------------------------------------------------ 晨报 */
     function MorningView({ t, lang, data, me, online, page, auto, onPage, onClose, onToggleAuto }) {
       const ideas = data.ideas;
@@ -3621,6 +3703,10 @@ window.__ModuleLoader__.load({
       const [openIdeaId, setOpenIdeaId] = useState(null);
       const [morning, setMorning] = useState(null);
       const [config, setConfig] = useState(null);
+      const [needsConnect, setNeedsConnect] = useState(false);
+      const [connectCode, setConnectCode] = useState('');
+      const [connectBusy, setConnectBusy] = useState(false);
+      const [connectError, setConnectError] = useState('');
       const [toastState, setToastState] = useState(null);
       const toastTimer = useRef(null);
       const refreshTimer = useRef(null);
@@ -3674,6 +3760,10 @@ window.__ModuleLoader__.load({
       useEffect(() => {
         let alive = true;
         refresh().catch((error) => {
+          if (error && error.code === 'connect_required') {
+            if (alive) setNeedsConnect(true);
+            return;
+          }
           if (alive) setLoadError(String(error && error.message ? error.message : error));
         });
         return () => {
@@ -3683,9 +3773,37 @@ window.__ModuleLoader__.load({
 
       useEffect(() => {
         request('/config')
-          .then((next) => setConfig(next))
+          .then((next) => {
+            setConfig(next);
+            if (next && next.shared && !next.secured) setNeedsConnect(true);
+          })
           .catch(() => {});
       }, []);
+
+      const connectWall = useCallback(async () => {
+        const code = connectCode.trim();
+        if (code === '') {
+          setConnectError(t('accessCodeRequired'));
+          return;
+        }
+        if (connectBusy) return;
+        setConnectBusy(true);
+        setConnectError('');
+        try {
+          const next = await request('/connect', { method: 'POST', body: { code } });
+          setConfig(next);
+          setNeedsConnect(false);
+          setConnectCode('');
+          showToast(t('connectedToast'));
+          await refresh().catch((error) => {
+            if (error && error.code === 'connect_required') setNeedsConnect(true);
+          });
+        } catch (error) {
+          setConnectError(String(error && error.message ? error.message : error));
+        } finally {
+          setConnectBusy(false);
+        }
+      }, [connectBusy, connectCode, refresh, showToast, t]);
 
       const meId = me ? me.id : '';
       useEffect(() => {
@@ -4190,7 +4308,7 @@ window.__ModuleLoader__.load({
                     onSubmit: submitComposer,
                   })
                 : null,
-              identityOpen
+              identityOpen && !needsConnect
                 ? h(IdentitySheet, {
                     t,
                     lang,
@@ -4223,6 +4341,21 @@ window.__ModuleLoader__.load({
                 : null,
               toastState ? h(Toast, { message: toastState.message, action: toastState.action }) : null,
             ),
+        needsConnect
+          ? h(ConnectionSheet, {
+              t,
+              lang,
+              serverHost: config && config.serverHost ? config.serverHost : '',
+              code: connectCode,
+              busy: connectBusy,
+              error: connectError,
+              onCode: (value) => {
+                setConnectCode(value);
+                if (connectError) setConnectError('');
+              },
+              onSubmit: connectWall,
+            })
+          : null,
       );
     }
 
