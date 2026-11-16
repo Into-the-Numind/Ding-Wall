@@ -45,7 +45,6 @@ window.__ModuleLoader__.load({
       addTodo: '加一张',
       drawLetter: '拆一封',
       writeLetter: '投一封信',
-      thanks: '点亮',
       fire: '有戏',
       echoSecond: '附议',
       pinned: '已钉到最前',
@@ -194,7 +193,6 @@ window.__ModuleLoader__.load({
       addTodo: 'Add card',
       drawLetter: 'Draw a letter',
       writeLetter: 'Write a letter',
-      thanks: 'Light it',
       fire: 'Love it',
       echoSecond: 'Second',
       pinned: 'Pinned to top',
@@ -2692,10 +2690,7 @@ window.__ModuleLoader__.load({
         actions.updateIdea(idea, { text: next }).then(() => setEditing(false)).catch(() => {});
       }
 
-      const reactions = [
-        { kind: 'spark', label: t('thanks'), icon: '✦' },
-        { kind: 'fire', label: t('fire'), icon: '🔥' },
-      ];
+      const reactions = [{ kind: 'fire', label: t('fire'), icon: '🔥' }];
 
       return h(
         'article',
