@@ -115,7 +115,10 @@ test('品牌版本号与待办：显示版本、无分类、可点状态图标',
   assert.match(SOURCE, /statusTodo: '未开始'/, '状态文案：未开始');
   assert.match(SOURCE, /statusDoing: '推进中'/, '状态文案：推进中');
   assert.match(SOURCE, /statusDone: '已完成'/, '状态文案：已完成');
-  assert.match(SOURCE, /dw-todo__status/, '每条待办必须有状态图标按钮');
+  assert.match(SOURCE, /dw-todo__status/, '每行待办必须有状态图标按钮');
+  assert.match(SOURCE, /dw-todo__line/, '待办必须按行渲染状态');
+  assert.match(SOURCE, /lineStatuses/, '待办必须使用逐行状态字段');
+  assert.doesNotMatch(SOURCE, /dw-sub/, '品牌下的副标题区域必须删除');
   assert.doesNotMatch(SOURCE, /dw-lane__head/, '分类栏头必须删除');
   assert.doesNotMatch(SOURCE, /draggable:/, '不再使用拖拽分类');
 });

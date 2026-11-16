@@ -49,7 +49,7 @@ If you'd like an agent to install it, send the one-liner below to an AI agent th
 ## Features
 
 - **Ideas as sticky notes** — one click to pin a thought; drag the wall into a calm paper workspace.
-- **To-dos as index cards** — tap the status icon to cycle Not started / In progress / Done.
+- **To-dos as index cards** — every line has its own status icon; tap it to cycle Not started / In progress / Done.
 - **Anonymous mailbox** — opinions are posted without an author; the server does not store who wrote them. Open a letter to delete it (team moderation; still no author stored).
 - **Real-time team pulse** — presence, activity bars and a hand-drawn weekly rhythm.
 - **Morning paper** — a broadsheet view for stand-ups, refreshed daily.

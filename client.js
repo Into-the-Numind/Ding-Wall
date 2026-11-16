@@ -37,7 +37,7 @@ window.__ModuleLoader__.load({
       echo: '匿名信箱',
       pulse: '团队心律',
       ideasHint: '随手一贴，先记下来。',
-      todosHint: '点左上角状态图标：未开始 → 推进中 → 已完成。',
+      todosHint: '点每行左侧的圆点图标，切换这一行的状态。',
       echoHint: '不方便当面说的，投进来。不记名字。',
       pulseHint: '墙上发生了什么，这里会知道。',
       drawIdea: '抽一张灵感',
@@ -192,7 +192,7 @@ window.__ModuleLoader__.load({
       echo: 'Anonymous box',
       pulse: 'Team pulse',
       ideasHint: 'Pin it first, polish later.',
-      todosHint: 'Click the status icon to cycle: not started → in progress → done.',
+      todosHint: 'Click the circle at the start of a line to change that line’s status.',
       echoHint: 'Say what is hard to say. No names.',
       pulseHint: 'What happened on the wall, at a glance.',
       drawIdea: 'Draw one',
@@ -576,25 +576,6 @@ window.__ModuleLoader__.load({
   color: var(--dw-ink-faint);
   vertical-align: middle;
   white-space: nowrap;
-}
-.dw-brand .dw-sub {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 4px 12px;
-  margin-top: 8px;
-  font-family: var(--dw-font-display);
-  font-size: clamp(12px, 1.15cqw, 15px);
-  letter-spacing: 0.18em;
-  color: var(--dw-ink-soft);
-}
-.dw-brand .dw-sub::after {
-  content: "PIN WALL · NO.001";
-  font-family: var(--dw-font-label);
-  font-size: 8.5px;
-  letter-spacing: 0.24em;
-  color: var(--dw-ink-faint);
-  transform: translateY(-1px);
 }
 .dw-head-right {
   display: flex;
@@ -1281,13 +1262,6 @@ window.__ModuleLoader__.load({
 .dw-todo.is-done {
   opacity: 0.78;
 }
-.dw-todo.is-done .dw-todo__text {
-  color: var(--dw-ink-soft);
-  text-decoration: line-through;
-  text-decoration-color: var(--dw-red);
-  text-decoration-thickness: 2px;
-  text-decoration-skip-ink: none;
-}
 .dw-todo__status {
   display: inline-flex;
   flex: none;
@@ -1338,6 +1312,38 @@ window.__ModuleLoader__.load({
   line-height: 1.62;
   white-space: pre-wrap;
   overflow-wrap: anywhere;
+}
+.dw-todo__line {
+  display: flex;
+  align-items: flex-start;
+  gap: 7px;
+}
+.dw-todo__line + .dw-todo__line {
+  margin-top: 2px;
+}
+.dw-todo__line .dw-todo__status {
+  width: 17px;
+  height: 17px;
+  margin-top: 1px;
+  font-size: 10px;
+}
+.dw-todo__line.is-blank {
+  height: 1.62em;
+}
+.dw-todo__line-text {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.dw-todo__line.is-done .dw-todo__line-text {
+  color: var(--dw-ink-soft);
+  text-decoration: line-through;
+  text-decoration-color: var(--dw-red);
+  text-decoration-thickness: 2px;
+  text-decoration-skip-ink: none;
+}
+.dw-todo__line.is-doing .dw-todo__line-text {
+  color: var(--dw-ink);
 }
 .dw-todo__foot {
   display: flex;
@@ -2405,9 +2411,7 @@ window.__ModuleLoader__.load({
   .dw-brand h1 {
     font-size: clamp(30px, 7cqw, 42px);
   }
-  .dw-brand .dw-sub::after {
-    display: none;
-  }
+
   .dw-pulse {
     display: flex;
     flex-direction: column;
@@ -2908,7 +2912,6 @@ window.__ModuleLoader__.load({
 
       function renderCard(todo) {
         const editing = editingId === todo.id;
-        const meta = statuses[todo.status] || statuses.todo;
         return h(
           'article',
           {
@@ -2918,20 +2921,6 @@ window.__ModuleLoader__.load({
           h(
             'div',
             { className: 'dw-todo__top' },
-            h(
-              'button',
-              {
-                type: 'button',
-                className: cx('dw-todo__status', `is-${todo.status}`),
-                title: `${meta.label} · ${t('cycleStatus')}`,
-                'aria-label': `${meta.label} · ${t('cycleStatus')}`,
-                onClick: (event) => {
-                  event.stopPropagation();
-                  void actions.moveTodo(todo, meta.next);
-                },
-              },
-              h('span', { 'aria-hidden': 'true' }, meta.glyph),
-            ),
             h('span', { className: 'dw-face-mini', 'aria-hidden': 'true' }, actions.emojiOf(todo.authorId)),
             h('span', null, actions.nameOf(todo.authorId)),
             todo.demo ? h('span', { className: 'dw-chip dw-chip--demo' }, t('demoTag')) : null,
@@ -2956,7 +2945,44 @@ window.__ModuleLoader__.load({
                   h(Strike, { label: t('save'), primary: true, onClick: () => saveEdit(todo) }),
                 ),
               )
-            : h('p', { className: 'dw-todo__text' }, todo.text),
+            : h(
+                'div',
+                { className: 'dw-todo__text' },
+                (() => {
+                  const lines = String(todo.text).split('\n');
+                  const source = Array.isArray(todo.lineStatuses) ? todo.lineStatuses : [];
+                  const fallback = statuses[todo.status] ? todo.status : 'todo';
+                  const lineStatuses = lines.map((line, index) => (statuses[source[index]] ? source[index] : fallback));
+                  return lines.map((line, index) => {
+                    if (line.trim() === '') {
+                      return h('div', { key: `blank-${index}`, className: 'dw-todo__line is-blank' }, '\u00a0');
+                    }
+                    const status = lineStatuses[index] || 'todo';
+                    const statusMeta = statuses[status] || statuses.todo;
+                    return h(
+                      'div',
+                      { key: index, className: cx('dw-todo__line', status === 'doing' && 'is-doing', status === 'done' && 'is-done') },
+                      h(
+                        'button',
+                        {
+                          type: 'button',
+                          className: cx('dw-todo__status', `is-${status}`),
+                          title: `${statusMeta.label} · ${t('cycleStatus')}`,
+                          'aria-label': `${statusMeta.label} · ${t('cycleStatus')}`,
+                          onClick: (event) => {
+                            event.stopPropagation();
+                            const nextStatuses = lineStatuses.slice();
+                            nextStatuses[index] = statusMeta.next;
+                            void actions.updateTodo(todo, { lineStatuses: nextStatuses });
+                          },
+                        },
+                        h('span', { 'aria-hidden': 'true' }, statusMeta.glyph),
+                      ),
+                      h('span', { className: 'dw-todo__line-text' }, line),
+                    );
+                  });
+                })(),
+              ),
           h(
             'div',
             { className: 'dw-todo__foot' },
@@ -4315,7 +4341,6 @@ window.__ModuleLoader__.load({
                       t('brand'),
                       config && config.version ? h('span', { className: 'dw-brand__ver' }, `v${config.version}`) : null,
                     ),
-                    h('span', { className: 'dw-sub' }, t('subtitle')),
                   ),
                 ),
                 h(
