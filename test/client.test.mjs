@@ -110,6 +110,16 @@ test('语言词典：中英词典齐备，覆盖主要界面文案', () => {
   }
 });
 
+test('品牌版本号与待办：显示版本、无分类、可点状态图标', () => {
+  assert.match(SOURCE, /dw-brand__ver/, '品牌旁必须有版本小字');
+  assert.match(SOURCE, /statusTodo: '未开始'/, '状态文案：未开始');
+  assert.match(SOURCE, /statusDoing: '推进中'/, '状态文案：推进中');
+  assert.match(SOURCE, /statusDone: '已完成'/, '状态文案：已完成');
+  assert.match(SOURCE, /dw-todo__status/, '每条待办必须有状态图标按钮');
+  assert.doesNotMatch(SOURCE, /dw-lane__head/, '分类栏头必须删除');
+  assert.doesNotMatch(SOURCE, /draggable:/, '不再使用拖拽分类');
+});
+
 test('样式：复原网页版的暖纸设计系统（纸感调色板 / 宋体 / 纸纹）', () => {
   for (const token of ['#f3ecdf', '#22201c', '#c3472f', '#d99a2b', '#2f5375', '#57795f', '#d8c3a1']) {
     assert.ok(SOURCE.includes(token), `缺少纸感调色板 ${token}`);

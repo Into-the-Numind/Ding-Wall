@@ -37,7 +37,7 @@ window.__ModuleLoader__.load({
       echo: '匿名信箱',
       pulse: '团队心律',
       ideasHint: '随手一贴，先记下来。',
-      todosHint: '拖到「推进中」，再拖到「已划掉」。',
+      todosHint: '点左上角状态图标：未开始 → 推进中 → 已完成。',
       echoHint: '不方便当面说的，投进来。不记名字。',
       pulseHint: '墙上发生了什么，这里会知道。',
       drawIdea: '抽一张灵感',
@@ -113,9 +113,9 @@ window.__ModuleLoader__.load({
       minutesAgo: '分钟前',
       hoursAgo: '小时前',
       daysAgo: '天前',
-      statusTodo: '待办',
+      statusTodo: '未开始',
       statusDoing: '推进中',
-      statusDone: '已划掉',
+      statusDone: '已完成',
       cycleStatus: '切换状态',
       doneToast: '划掉一张，干得漂亮',
       undo: '撤销',
@@ -192,7 +192,7 @@ window.__ModuleLoader__.load({
       echo: 'Anonymous box',
       pulse: 'Team pulse',
       ideasHint: 'Pin it first, polish later.',
-      todosHint: 'Drag between lanes to move it forward.',
+      todosHint: 'Click the status icon to cycle: not started → in progress → done.',
       echoHint: 'Say what is hard to say. No names.',
       pulseHint: 'What happened on the wall, at a glance.',
       drawIdea: 'Draw one',
@@ -268,8 +268,8 @@ window.__ModuleLoader__.load({
       minutesAgo: ' min ago',
       hoursAgo: ' h ago',
       daysAgo: ' d ago',
-      statusTodo: 'To-do',
-      statusDoing: 'Doing',
+      statusTodo: 'Not started',
+      statusDoing: 'In progress',
       statusDone: 'Done',
       cycleStatus: 'Change status',
       doneToast: 'One card done. Nice.',
@@ -566,6 +566,16 @@ window.__ModuleLoader__.load({
   line-height: 0.92;
   letter-spacing: 0.015em;
   color: var(--dw-ink);
+}
+.dw-brand__ver {
+  margin-left: 9px;
+  font-family: var(--dw-font-label);
+  font-size: 10px;
+  font-weight: 400;
+  letter-spacing: 0.1em;
+  color: var(--dw-ink-faint);
+  vertical-align: middle;
+  white-space: nowrap;
 }
 .dw-brand .dw-sub {
   display: flex;
@@ -1217,47 +1227,6 @@ window.__ModuleLoader__.load({
 }
 
 /* --------------------------------------------------------- 02 待办 */
-.dw-lanes {
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
-}
-.dw-lane {
-  border-top: 1px solid var(--dw-rule-soft);
-  padding-top: 10px;
-  border-radius: 2px;
-}
-.dw-lane:first-child {
-  border-top: 0;
-  padding-top: 0;
-}
-.dw-lane.is-over {
-  background: var(--dw-amber-wash);
-  outline: 1px dashed var(--dw-amber-deep);
-  outline-offset: 6px;
-}
-.dw-lane__head {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 8px;
-  margin-bottom: 8px;
-  font-size: 10.5px;
-  font-weight: 600;
-  letter-spacing: 0.18em;
-  color: var(--dw-ink-soft);
-}
-.dw-lane__count {
-  font-family: var(--dw-font-display);
-  font-size: 12px;
-  letter-spacing: 0;
-  color: var(--dw-ink-faint);
-}
-.dw-lane__empty {
-  padding: 6px 2px;
-  font-size: 10.5px;
-  color: var(--dw-ink-faint);
-}
 .dw-cards {
   display: flex;
   flex-direction: column;
@@ -1284,7 +1253,7 @@ window.__ModuleLoader__.load({
   box-shadow:
     0 1px 0 rgba(34, 32, 28, 0.08),
     0 3px 5px -3px rgba(34, 32, 28, 0.28);
-  cursor: grab;
+  cursor: default;
   overflow-wrap: anywhere;
   transition:
     transform 0.2s var(--dw-ease),
@@ -1310,8 +1279,7 @@ window.__ModuleLoader__.load({
     0 16px 22px -16px rgba(34, 32, 28, 0.42);
 }
 .dw-todo.is-done {
-  opacity: 0.8;
-  padding-bottom: 30px;
+  opacity: 0.78;
 }
 .dw-todo.is-done .dw-todo__text {
   color: var(--dw-ink-soft);
@@ -1319,6 +1287,42 @@ window.__ModuleLoader__.load({
   text-decoration-color: var(--dw-red);
   text-decoration-thickness: 2px;
   text-decoration-skip-ink: none;
+}
+.dw-todo__status {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border: 1px solid rgba(34, 32, 28, 0.22);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.38);
+  font-size: 12px;
+  line-height: 1;
+  color: var(--dw-ink-faint);
+  cursor: pointer;
+  transition:
+    background-color 0.18s var(--dw-ease),
+    border-color 0.18s var(--dw-ease),
+    color 0.18s var(--dw-ease),
+    transform 0.18s var(--dw-ease);
+}
+.dw-todo__status:hover {
+  transform: scale(1.08);
+  border-color: var(--dw-ink-soft);
+}
+.dw-todo__status.is-doing {
+  color: var(--dw-amber-deep);
+  border-color: rgba(169, 113, 26, 0.45);
+  background: var(--dw-amber-wash);
+}
+.dw-todo__status.is-done {
+  color: var(--dw-green-deep);
+  border-color: rgba(64, 93, 71, 0.42);
+  background: rgba(87, 121, 95, 0.14);
+  font-weight: 700;
 }
 .dw-todo__top {
   display: flex;
@@ -1344,22 +1348,7 @@ window.__ModuleLoader__.load({
   padding-top: 7px;
   border-top: 1px dotted rgba(34, 32, 28, 0.13);
 }
-.dw-stamp {
-  position: absolute;
-  right: 9px;
-  bottom: 8px;
-  padding: 1px 5px;
-  border: 1.5px solid var(--dw-red);
-  border-radius: 2px;
-  font-family: var(--dw-font-label);
-  font-size: 8.5px;
-  font-weight: 700;
-  letter-spacing: 0.16em;
-  color: var(--dw-red);
-  transform: rotate(-6deg);
-  opacity: 0.8;
-  z-index: 2;
-}
+
 
 /* --------------------------------------------------------- 03 信箱 */
 .dw-mailbox {
@@ -2898,13 +2887,11 @@ window.__ModuleLoader__.load({
       const [editingId, setEditingId] = useState(null);
       const [draft, setDraft] = useState('');
       const [armed, setArmed] = useState(null);
-      const [over, setOver] = useState(null);
-      const lanes = [
-        { key: 'todo', label: t('statusTodo') },
-        { key: 'doing', label: t('statusDoing') },
-        { key: 'done', label: t('statusDone') },
-      ];
-      const laneOf = (status) => data.todos.filter((todo) => todo.status === status);
+      const statuses = {
+        todo: { label: t('statusTodo'), glyph: '○', next: 'doing' },
+        doing: { label: t('statusDoing'), glyph: '◐', next: 'done' },
+        done: { label: t('statusDone'), glyph: '✓', next: 'todo' },
+      };
 
       function startEdit(todo) {
         setDraft(todo.text);
@@ -2921,26 +2908,34 @@ window.__ModuleLoader__.load({
 
       function renderCard(todo) {
         const editing = editingId === todo.id;
+        const meta = statuses[todo.status] || statuses.todo;
         return h(
           'article',
           {
             key: todo.id,
-            className: cx('dw-todo', todo.status === 'done' && 'is-done', over === null && null),
-            draggable: !editing,
-            onDragStart: (event) => {
-              event.dataTransfer.setData('text/plain', todo.id);
-              event.dataTransfer.effectAllowed = 'move';
-            },
-            onDragEnd: () => setOver(null),
+            className: cx('dw-todo', todo.status === 'done' && 'is-done'),
           },
           h(
             'div',
             { className: 'dw-todo__top' },
+            h(
+              'button',
+              {
+                type: 'button',
+                className: cx('dw-todo__status', `is-${todo.status}`),
+                title: `${meta.label} · ${t('cycleStatus')}`,
+                'aria-label': `${meta.label} · ${t('cycleStatus')}`,
+                onClick: (event) => {
+                  event.stopPropagation();
+                  void actions.moveTodo(todo, meta.next);
+                },
+              },
+              h('span', { 'aria-hidden': 'true' }, meta.glyph),
+            ),
             h('span', { className: 'dw-face-mini', 'aria-hidden': 'true' }, actions.emojiOf(todo.authorId)),
             h('span', null, actions.nameOf(todo.authorId)),
             todo.demo ? h('span', { className: 'dw-chip dw-chip--demo' }, t('demoTag')) : null,
             h('span', { className: 'dw-spacer' }),
-            todo.status === 'done' ? h('span', { className: 'dw-stamp' }, 'DONE') : null,
             h('span', { className: 'dw-note__time' }, relTime(todo.createdAt, lang)),
           ),
           editing
@@ -2965,10 +2960,6 @@ window.__ModuleLoader__.load({
           h(
             'div',
             { className: 'dw-todo__foot' },
-            h(Strike, {
-              label: `⇄ ${t('cycleStatus')}`,
-              onClick: () => actions.moveTodo(todo, todo.status === 'todo' ? 'doing' : todo.status === 'doing' ? 'done' : 'todo'),
-            }),
             h(Strike, { label: t('edit'), onClick: () => startEdit(todo) }),
             h(Strike, {
               label: armed === todo.id ? t('confirmDelete') : t('delete'),
@@ -2995,49 +2986,13 @@ window.__ModuleLoader__.load({
           hint: t('todosHint'),
           tools: [h('button', { key: 'add', type: 'button', className: 'dw-btn dw-btn--small', onClick: () => onCompose('todo') }, `＋ ${t('addTodo')}`)],
         }),
-        h(
-          'div',
-          { className: 'dw-lanes' },
-          lanes.map((lane) => {
-            const cards = laneOf(lane.key);
-            return h(
-              'div',
-              {
-                key: lane.key,
-                className: cx('dw-lane', over === lane.key && 'is-over'),
-                onDragOver: (event) => {
-                  event.preventDefault();
-                  event.dataTransfer.dropEffect = 'move';
-                  if (over !== lane.key) setOver(lane.key);
-                },
-                onDragLeave: () => setOver((current) => (current === lane.key ? null : current)),
-                onDrop: (event) => {
-                  event.preventDefault();
-                  setOver(null);
-                  const id = event.dataTransfer.getData('text/plain');
-                  const todo = data.todos.find((item) => item.id === id);
-                  if (todo && todo.status !== lane.key) void actions.moveTodo(todo, lane.key);
-                },
-              },
-              h(
-                'div',
-                { className: 'dw-lane__head' },
-                h('span', null, lane.label),
-                h('span', { className: 'dw-lane__count' }, String(cards.length)),
-              ),
-              cards.length === 0
-                ? h('div', { className: 'dw-lane__empty' }, '—')
-                : h('div', { className: 'dw-cards' }, cards.map(renderCard)),
-            );
-          }),
-        ),
         data.todos.length === 0
           ? h(EmptyBox, {
               title: t('emptyTodosTitle'),
               desc: t('emptyTodosDesc'),
               actions: [h(Strike, { key: 'add', label: t('addTodo'), primary: true, onClick: () => onCompose('todo') })],
             })
-          : null,
+          : h('div', { className: 'dw-cards' }, data.todos.map(renderCard)),
       );
     }
 
@@ -4351,7 +4306,17 @@ window.__ModuleLoader__.load({
                   'div',
                   { className: 'dw-brand' },
                   h('span', { className: 'dw-pin', 'aria-hidden': 'true' }),
-                  h('div', null, h('h1', null, t('brand')), h('span', { className: 'dw-sub' }, t('subtitle'))),
+                  h(
+                    'div',
+                    null,
+                    h(
+                      'h1',
+                      null,
+                      t('brand'),
+                      config && config.version ? h('span', { className: 'dw-brand__ver' }, `v${config.version}`) : null,
+                    ),
+                    h('span', { className: 'dw-sub' }, t('subtitle')),
+                  ),
                 ),
                 h(
                   'div',
