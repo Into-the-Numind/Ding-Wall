@@ -1,6 +1,6 @@
 {
   "name": "dsh-ding-wall",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "description": "Ding Wall · 钉一钉 — a warm paper-style shared pinboard plugin for DeepSeek Harness: ideas, to-dos, anonymous notes and team pulse.",
   "type": "module",
   "main": "lib/index.js",
@@ -55,6 +55,6 @@
     }
   },
   "scripts": {
-    "test": "node --test test/host.test.mjs test/client.test.mjs"
+    "test": "node --test test/host.test.mjs test/client.test.mjs test/update.test.mjs"
   }
 }

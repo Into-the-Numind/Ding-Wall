@@ -101,9 +101,20 @@ Remove the plugin in Plugin Manager. Your wall data stays in `$DSH_HOME/ding-wal
 - **Team wall by default:** wall data lives on the team's self-hosted shared service; team members share one wall.
 - **Access code stays local:** after the first connection it is stored in `$DSH_HOME/ding-wall/connection.json` (mode 600), never sent to the browser and never committed to this repo.
 - **Anonymous opinions:** no author ID is persisted for mailbox entries.
-- **No telemetry, no analytics, no CDN calls.**
+- **No telemetry or analytics;** the update check reads the public version from GitHub and sends no personal data.
 - The host plugin runs with your user permissions — like any Harness plugin, read the source before installing if you need to.
 - In local-only mode (`serverUrl` empty), data stays in `$DSH_HOME/ding-wall/wall.json` on this machine.
+
+## Update the plugin
+
+From v0.2.4, the panel checks for a newer version automatically and shows a small “New version · x.y.z” strip with an **Update** button.
+
+- If only the client bundle changed, the panel reloads automatically after updating;
+- If host code or the bundle patch changed, it asks you to **fully quit and restart DeepSeek Harness**;
+- Auto-update requires the **git clone installation** described above; zip installs fall back to a manual download link from GitHub Releases;
+- The check only reads the public `package.json` version from GitHub and sends no personal data.
+
+> Users still on v0.2.3 or older do not have this button yet: run `git pull` once and restart Harness to get v0.2.4, then future updates appear in the panel.
 
 ## Team wall (default) and local-only mode
 

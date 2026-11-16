@@ -165,6 +165,13 @@ window.__ModuleLoader__.load({
       todoAdded: '待办加上墙了',
       letterSent: '信投进信箱了',
       letterDeleted: '匿名信已销毁',
+      updateAvailable: '发现新版本',
+      updateNow: '更新',
+      updating: '更新中…',
+      updateLatest: '已经是最新版本',
+      updateRestart: '更新完成，请完全退出并重启 Harness 后生效',
+      updateReload: '更新完成，正在刷新…',
+      updateFailed: '更新失败',
       reactNeedIdentity: '先认领一张名片，才能盖章',
       morningRequires: '墙上还没有内容，先钉一张吧',
       loading: '正在打开这面墙…',
@@ -313,6 +320,13 @@ window.__ModuleLoader__.load({
       todoAdded: 'To-do added',
       letterSent: 'Letter delivered',
       letterDeleted: 'Letter deleted',
+      updateAvailable: 'New version',
+      updateNow: 'Update',
+      updating: 'Updating…',
+      updateLatest: 'You are on the latest version',
+      updateRestart: 'Updated. Fully quit and restart Harness to apply it.',
+      updateReload: 'Updated, reloading…',
+      updateFailed: 'Update failed',
       reactNeedIdentity: 'Claim a card first',
       morningRequires: 'Nothing on the wall yet.',
       loading: 'Opening the wall…',
@@ -849,6 +863,31 @@ window.__ModuleLoader__.load({
   border-radius: 2px;
   font-size: 11.5px;
   color: var(--dw-red-deep);
+}
+.dw-update {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+  padding: 7px 10px 7px 12px;
+  border: 1px solid rgba(195, 71, 47, 0.28);
+  background: var(--dw-red-wash);
+  border-radius: 2px;
+  font-size: 11.5px;
+  color: var(--dw-red-deep);
+}
+.dw-update__text {
+  display: flex;
+  flex: 1;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: baseline;
+}
+.dw-update__msg {
+  color: var(--dw-ink-soft);
+}
+.dw-update .dw-btn {
+  flex: none;
 }
 .dw-in {
   animation: dw-in 0.22s var(--dw-ease) both;
@@ -3713,10 +3752,14 @@ window.__ModuleLoader__.load({
       const [composerBusy, setComposerBusy] = useState(false);
       const [composerError, setComposerError] = useState('');
       const [connection, setConnection] = useState('connecting');
+      const [sseOnline, setSseOnline] = useState(false);
       const [online, setOnline] = useState([]);
       const [openIdeaId, setOpenIdeaId] = useState(null);
       const [morning, setMorning] = useState(null);
       const [config, setConfig] = useState(null);
+      const [updateInfo, setUpdateInfo] = useState(null);
+      const [updating, setUpdating] = useState(false);
+      const [updateMessage, setUpdateMessage] = useState('');
       const [needsConnect, setNeedsConnect] = useState(false);
       const [connectCode, setConnectCode] = useState('');
       const [connectBusy, setConnectBusy] = useState(false);
@@ -3750,6 +3793,7 @@ window.__ModuleLoader__.load({
         const next = await request('/state');
         setSnapshot(next);
         setLoadError('');
+        setConnection('online');
         const saved = meRef.current;
         if (saved) {
           const found = next.members.find((member) => member.id === saved.id);
@@ -3794,6 +3838,60 @@ window.__ModuleLoader__.load({
           .catch(() => {});
       }, []);
 
+      useEffect(() => {
+        let alive = true;
+        const check = () => {
+          request('/update')
+            .then((info) => {
+              if (alive) setUpdateInfo(info);
+            })
+            .catch(() => {});
+        };
+        check();
+        const timer = setInterval(check, 30 * 60 * 1000);
+        return () => {
+          alive = false;
+          clearInterval(timer);
+        };
+      }, []);
+
+      const applyUpdate = useCallback(async () => {
+        if (updating) return;
+        setUpdating(true);
+        setUpdateMessage('');
+        try {
+          const result = await request('/update', { method: 'POST' });
+          if (!result || !result.ok) {
+            setUpdateMessage(result && result.message ? result.message : t('updateFailed'));
+            setUpdating(false);
+            return;
+          }
+          setUpdateInfo((current) => ({
+            ...(current || {}),
+            updateAvailable: false,
+            latestVersion: result.to || (current && current.latestVersion) || '',
+          }));
+          if (!result.updated) {
+            setUpdateMessage(t('updateLatest'));
+            setUpdating(false);
+            return;
+          }
+          if (result.restartRequired) {
+            setUpdateMessage(t('updateRestart'));
+            setUpdating(false);
+            showToast(t('updateRestart'));
+            return;
+          }
+          setUpdateMessage(t('updateReload'));
+          setTimeout(() => {
+            window.location.reload();
+          }, 900);
+        } catch (error) {
+          setUpdateMessage(String(error && error.message ? error.message : error));
+          setUpdating(false);
+        }
+      }, [showToast, t, updating]);
+
       const connectWall = useCallback(async () => {
         const code = connectCode.trim();
         if (code === '') {
@@ -3822,6 +3920,7 @@ window.__ModuleLoader__.load({
       const meId = me ? me.id : '';
       useEffect(() => {
         if (typeof window.EventSource !== 'function') return undefined;
+        setSseOnline(false);
         const query = meId ? `?memberId=${encodeURIComponent(meId)}` : '';
         let source = null;
         try {
@@ -3829,7 +3928,10 @@ window.__ModuleLoader__.load({
         } catch {
           return undefined;
         }
-        const onOpen = () => setConnection('online');
+        const onOpen = () => {
+          setSseOnline(true);
+          setConnection('online');
+        };
         const onPresence = (event) => {
           try {
             const payload = JSON.parse(event.data);
@@ -3850,7 +3952,13 @@ window.__ModuleLoader__.load({
             refresh().catch(() => {});
           }, 120);
         };
-        const onError = () => setConnection('reconnecting');
+        const onError = () => {
+          setSseOnline(false);
+          // SSE 断线不等于墙不可达：先用一次 HTTP 刷新确认；HTTP 正常就不显示“未连接”。
+          refresh()
+            .then(() => setConnection('online'))
+            .catch(() => setConnection('reconnecting'));
+        };
         source.addEventListener('open', onOpen);
         source.addEventListener('hello', onOpen);
         source.addEventListener('presence', onPresence);
@@ -3869,12 +3977,12 @@ window.__ModuleLoader__.load({
       // SSE 不可用（代理/中间层不支持长连接等）时：轮询兜底，保证多人墙仍能同步。
       const hasSnapshot = Boolean(snapshot);
       useEffect(() => {
-        if (!hasSnapshot || connection === 'online') return undefined;
+        if (!hasSnapshot || sseOnline) return undefined;
         const timer = setInterval(() => {
-          refresh().catch(() => {});
+          refresh().catch(() => setConnection('reconnecting'));
         }, 5000);
         return () => clearInterval(timer);
-      }, [hasSnapshot, connection, refresh]);
+      }, [hasSnapshot, sseOnline, refresh]);
 
       useEffect(() => {
         if (!morning || !morning.auto) return undefined;
@@ -4273,6 +4381,28 @@ window.__ModuleLoader__.load({
               h(
                 'div',
                 { className: 'dw-scroll' },
+                updateInfo && updateInfo.updateAvailable
+                  ? h(
+                      'div',
+                      { className: 'dw-update', role: 'status' },
+                      h(
+                        'span',
+                        { className: 'dw-update__text' },
+                        `${t('updateAvailable')} · ${updateInfo.latestVersion}`,
+                        updateMessage ? h('span', { className: 'dw-update__msg' }, updateMessage) : null,
+                      ),
+                      h(
+                        'button',
+                        {
+                          type: 'button',
+                          className: 'dw-btn dw-btn--small dw-btn--primary',
+                          disabled: updating,
+                          onClick: applyUpdate,
+                        },
+                        updating ? t('updating') : t('updateNow'),
+                      ),
+                    )
+                  : null,
                 connection === 'reconnecting' ? h('div', { className: 'dw-banner' }, t('offline')) : null,
                 hasDemo ? h('div', { className: 'dw-demo' }, t('demoBanner'), h('span', { style: { flex: 1 } }), h(Strike, { label: t('clearDemo'), onClick: clearDemo })) : null,
                 h(

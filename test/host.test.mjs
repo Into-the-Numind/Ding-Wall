@@ -100,6 +100,29 @@ test('config：默认团队墙自动使用随包内置的公开 CA', () => {
   assert.equal(local.serverCa, '');
 });
 
+test('更新：GET /update 从注入的 feed 读取最新版本', async () => {
+  const feed = http.createServer((req, res) => {
+    res.writeHead(200, { 'content-type': 'application/json' });
+    res.end(JSON.stringify({ version: '9.9.9' }));
+  });
+  await new Promise((resolve) => feed.listen(0, '127.0.0.1', resolve));
+  const feedBase = `http://127.0.0.1:${feed.address().port}`;
+  const dataDir = await fs.mkdtemp(path.join(os.tmpdir(), 'ding-wall-update-route-'));
+  const plugin = mountPlugin({ stateDir: dataDir, updateFeedUrl: `${feedBase}/package.json`, updateRepoUrl: 'https://example.invalid/repo' });
+  const { server, base } = await listen((req, res) => plugin.route.handler(req, res));
+  try {
+    const info = await (await json(base, `${PREFIX}/update`)).json();
+    assert.equal(info.latestVersion, '9.9.9');
+    assert.equal(info.updateAvailable, true);
+    assert.match(info.releaseUrl, /releases\/latest$/);
+  } finally {
+    await closeServer(server);
+    await plugin.close();
+    await closeServer(feed);
+    await fs.rm(dataDir, { recursive: true, force: true });
+  }
+});
+
 test('config：本地模式声明、不暴露本机路径', async () => {
   await withLocalPlugin('config', async ({ base }) => {
     const response = await json(base, `${PREFIX}/config`);
