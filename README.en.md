@@ -1,8 +1,8 @@
 # Ding Wall · 钉一钉
 
-**A warm, paper-like shared pinboard for small teams — as a DeepSeek Harness panel plugin.**
+**A calm, dusk-toned shared wall for small teams — as a DeepSeek Harness panel plugin.**
 
-Ideas pinned as sticky notes, to-dos as index cards, anonymous feedback in a kraft-paper mailbox. Real-time sync for a small team, a hand-drawn “team pulse”, and a morning-paper mode for stand-ups.
+Dark slate, smoked glass and a bone-toned mailbox, with two signals: periwinkle and apricot. Ideas, to-dos and anonymous notes stay quietly on one wall, synced in real time.
 
 The plugin connects to the team wall by default: enter the team access code once on first open. You can switch back to a local-only wall if you prefer.
 
@@ -53,7 +53,7 @@ If you'd like an agent to install it, send the one-liner below to an AI agent th
 - **Anonymous mailbox** — opinions are posted without an author; the server does not store who wrote them. Open a letter to delete it (team moderation; still no author stored).
 - **Real-time team pulse** — presence, activity bars and a hand-drawn weekly rhythm.
 - **Morning paper** — a broadsheet view for stand-ups, refreshed daily.
-- **Warm paper aesthetic** — cream paper, Songti display type, pins, tape, rubber stamps and grain, restored from the original web design.
+- **Dusk visual system** — dark slate, smoked glass, bone wells, periwinkle/apricot signals and restrained labels.
 - **Team wall by default** — installation connects to the team wall; enter the access code once and it stays on this machine. A local-only wall is still available.
 - **Bilingual UI** — 简体中文 / English, following the Harness locale.
 

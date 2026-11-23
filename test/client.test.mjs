@@ -123,21 +123,20 @@ test('品牌版本号与待办：显示版本、无分类、可点状态图标',
   assert.doesNotMatch(SOURCE, /draggable:/, '不再使用拖拽分类');
 });
 
-test('样式：复原网页版的暖纸设计系统（纸感调色板 / 宋体 / 纸纹）', () => {
-  for (const token of ['#f3ecdf', '#22201c', '#c3472f', '#d99a2b', '#2f5375', '#57795f', '#d8c3a1']) {
-    assert.ok(SOURCE.includes(token), `缺少纸感调色板 ${token}`);
+test('样式：Dusk 暗色玻璃设计系统（石板 / 烟熏玻璃 / bone / 双信号）', () => {
+  for (const token of ['#14141c', '#b9b8ff', '#ffd2a1', '#f3f0ea']) {
+    assert.ok(SOURCE.includes(token), `缺少 Dusk 调色板 ${token}`);
   }
-  assert.ok(SOURCE.includes('Songti SC'), '标题必须使用宋体展示字体');
-  assert.ok(SOURCE.includes('feTurbulence'), '必须带纸张颗粒纹理（SVG 噪点）');
-  assert.ok(SOURCE.includes('repeating-linear-gradient'), '必须带纸纤维/格线纹理');
-  assert.ok(SOURCE.includes('.dw-note--tone-'), '便签必须有多种纸色');
-  assert.ok(SOURCE.includes('.dw-fab'), '必须保留原版红色浮动「钉一张」按钮');
+  assert.ok(SOURCE.includes('Wix Madefor'), '标题/正文必须使用 Dusk 的 Wix Madefor 字体栈');
+  assert.ok(SOURCE.includes('backdrop-filter'), '必须使用烟熏玻璃材质');
+  assert.ok(SOURCE.includes('--dw-well'), '必须包含 bone well 浅色表面');
+  assert.ok(SOURCE.includes('.dw-note--tone-'), '便签必须有 tone 钩子（由 Dusk 层统一表面）');
+  assert.ok(SOURCE.includes('.dw-fab'), '必须保留「钉一张」浮动按钮');
+  assert.ok(SOURCE.includes('.dw-todo__status'), '待办必须有逐行状态控件');
   for (const name of ['dw-note__text', 'dw-todo__text', 'dw-letter__text']) {
     const rule = (SOURCE.match(new RegExp(`(?:^|\\n)\\.${name} \\{[\\s\\S]*?\\}`)) || [''])[0];
     assert.match(rule, /white-space:\s*pre-wrap/, `${name} 必须保留用户输入的换行`);
   }
-  assert.ok(SOURCE.includes('linear-gradient(rgba(47, 83, 117, 0.13) 1px'), '团队心律必须是方格纸底');
-  assert.ok(SOURCE.includes('data:image/svg+xml'), '纸纹必须是本地内联资源，不能外链');
 });
 
 test('产物纯净：无 import、无 Node/平台包、无外链请求', () => {

@@ -32,10 +32,10 @@ window.__ModuleLoader__.load({
       morningShort: '晨报',
       claim: '认领名片',
       editCard: '名片',
-      ideas: '灵感便签',
-      todos: '待办卡',
+      ideas: '灵感',
+      todos: '待办',
       echo: '匿名信箱',
-      pulse: '团队心律',
+      pulse: '团队',
       ideasHint: '随手一贴，先记下来。',
       todosHint: '点每行左侧的圆点图标，切换这一行的状态。',
       echoHint: '不方便当面说的，投进来。不记名字。',
@@ -190,7 +190,7 @@ window.__ModuleLoader__.load({
       ideas: 'Ideas',
       todos: 'To-dos',
       echo: 'Anonymous box',
-      pulse: 'Team pulse',
+      pulse: 'Team',
       ideasHint: 'Pin it first, polish later.',
       todosHint: 'Click the circle at the start of a line to change that line’s status.',
       echoHint: 'Say what is hard to say. No names.',
@@ -2543,6 +2543,549 @@ window.__ModuleLoader__.load({
     transition: none !important;
   }
 }
+/* ============================================================
+   DUSK 主题覆盖层
+   暗石板 / 烟熏玻璃 / bone 井 / 长春花蓝 + 杏色双信号
+   ============================================================ */
+.dw-root {
+  --dw-paper: #14141c;
+  --dw-paper-deep: #1b1b24;
+  --dw-paper-warm: #201f2a;
+  --dw-card: #24232f;
+  --dw-ink: #f4f2ee;
+  --dw-ink-soft: #d5d4e0;
+  --dw-ink-faint: #a5a4b6;
+  --dw-rule: rgba(255, 255, 255, 0.12);
+  --dw-rule-soft: rgba(255, 255, 255, 0.07);
+  --dw-red: #b9b8ff;
+  --dw-red-deep: #d3d2ff;
+  --dw-red-wash: rgba(185, 184, 255, 0.13);
+  --dw-amber: #ffd2a1;
+  --dw-amber-deep: #ffdfba;
+  --dw-amber-wash: rgba(255, 210, 161, 0.13);
+  --dw-blue: #b9b8ff;
+  --dw-blue-deep: #d5d4e0;
+  --dw-green: #b9b8ff;
+  --dw-green-deep: #d3d2ff;
+  --dw-kraft: #f3f0ea;
+  --dw-kraft-deep: #e8e4dc;
+  --dw-sticky-1: #24232f;
+  --dw-sticky-2: #24232f;
+  --dw-sticky-3: #24232f;
+  --dw-sticky-4: #24232f;
+  --dw-sticky-5: #24232f;
+  --dw-font-display: "Wix Madefor Display", "PingFang SC", "Hiragino Sans GB", "Noto Sans SC", system-ui, sans-serif;
+  --dw-font-body: "Wix Madefor Text", "PingFang SC", "Hiragino Sans GB", "Noto Sans SC", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --dw-font-label: "Wix Madefor Text", "PingFang SC", "Hiragino Sans GB", system-ui, sans-serif;
+  --dw-ease: cubic-bezier(0.16, 1, 0.3, 1);
+  --dw-shadow-note: 0 1px 0 rgba(255, 255, 255, 0.05) inset, 0 24px 42px -30px rgba(0, 0, 0, 0.85);
+  --dw-shadow-lift: 0 1px 0 rgba(255, 255, 255, 0.07) inset, 0 34px 56px -34px rgba(0, 0, 0, 0.9);
+  --dw-well: #f3f0ea;
+  --dw-well-2: #e8e4dc;
+  --dw-well-ink: #1b1b24;
+  --dw-well-muted: #5b5967;
+  --dw-well-rule: #d6d1c8;
+  --dw-card-light: #fbfaf7;
+  --dw-glass: rgba(24, 24, 34, 0.66);
+  --dw-glass-hi: inset 0 1px 0 rgba(255, 255, 255, 0.10), inset 0 0 0 1px rgba(255, 255, 255, 0.055);
+  background-color: var(--dw-paper);
+  background-image:
+    radial-gradient(72% 46% at 10% -10%, rgba(185, 184, 255, 0.16), transparent 62%),
+    radial-gradient(52% 34% at 96% -8%, rgba(255, 210, 161, 0.10), transparent 58%),
+    linear-gradient(180deg, #1c1b26 0%, var(--dw-paper) 44%, #101017 100%);
+  color: var(--dw-ink);
+  color-scheme: dark;
+  font-family: var(--dw-font-body);
+  font-size: 13px;
+  line-height: 1.6;
+}
+.dw-root::before { display: none; }
+.dw-root :focus-visible { outline: 2px solid var(--dw-red); outline-offset: 2px; }
+.dw-root ::selection { background: rgba(185, 184, 255, 0.26); color: var(--dw-ink); }
+
+/* 顶栏 */
+.dw-head {
+  align-items: center;
+  padding: 20px clamp(18px, 2.4cqw, 30px) 12px;
+  border-bottom: 1px solid var(--dw-rule-soft);
+}
+.dw-brand { align-items: center; gap: 11px; }
+.dw-pin {
+  width: 10px;
+  height: 10px;
+  margin-top: 0;
+  border-radius: 50%;
+  background: var(--dw-red);
+  box-shadow: 0 0 0 4px rgba(185, 184, 255, 0.12);
+  transform: none;
+}
+.dw-brand h1 {
+  font-family: var(--dw-font-display);
+  font-size: clamp(26px, 2.9cqw, 36px);
+  font-weight: 500;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  color: var(--dw-ink);
+}
+.dw-brand__ver {
+  margin-left: 8px;
+  font-family: var(--dw-font-body);
+  font-size: 10px;
+  letter-spacing: 0.02em;
+  color: var(--dw-ink-faint);
+}
+.dw-head-right {
+  flex-direction: row;
+  align-items: center;
+  gap: 14px;
+}
+.dw-date { display: none; }
+.dw-head-actions { gap: 8px; align-items: center; }
+.dw-presence { gap: 3px; }
+.dw-presence .dw-face { width: 24px; height: 24px; font-size: 11px; border-color: rgba(255, 255, 255, 0.16); background: #262532; }
+.dw-presence .dw-face.is-online::after { background: var(--dw-red); box-shadow: 0 0 0 2px var(--dw-paper); }
+.dw-people-count { display: none; }
+
+/* 按钮 */
+.dw-btn,
+.dw-btn--ink {
+  min-height: 34px;
+  padding: 0 14px;
+  border: 1px solid rgba(255, 255, 255, 0.11);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.045);
+  color: var(--dw-ink-soft);
+  font-family: var(--dw-font-body);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+.dw-btn:hover,
+.dw-btn--ink:hover {
+  background: rgba(255, 255, 255, 0.085);
+  color: var(--dw-ink);
+  transform: none;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+.dw-btn--primary {
+  border-color: transparent;
+  background: var(--dw-red);
+  color: #19172a;
+  font-weight: 600;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35);
+}
+.dw-btn--primary:hover { background: #cbc9ff; color: #19172a; }
+.dw-btn--quiet { background: transparent; border-color: transparent; color: var(--dw-ink-faint); }
+.dw-btn--quiet:hover { background: rgba(255, 255, 255, 0.055); color: var(--dw-ink); }
+.dw-btn--small { min-height: 30px; padding: 0 11px; font-size: 11.5px; }
+.dw-kbd, .dw-fab__kbd { display: none; }
+
+/* 滚动与产品表面 */
+.dw-scroll {
+  padding: 12px clamp(16px, 2.4cqw, 28px) 34px;
+  scrollbar-color: #393848 transparent;
+}
+.dw-scroll::-webkit-scrollbar-thumb { background: #393848; border-radius: 99px; }
+.dw-grid {
+  gap: 26px;
+  padding: clamp(16px, 2.1cqw, 26px);
+  background: var(--dw-glass);
+  border: 1px solid rgba(255, 255, 255, 0.075);
+  border-radius: 18px;
+  box-shadow: var(--dw-glass-hi), 0 44px 90px -52px rgba(0, 0, 0, 0.9);
+  -webkit-backdrop-filter: blur(22px) saturate(1.25);
+  backdrop-filter: blur(22px) saturate(1.25);
+}
+.dw-section { min-width: 0; }
+.dw-section__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding-bottom: 10px;
+  margin-bottom: 14px;
+  border-bottom: 1px solid var(--dw-rule);
+}
+.dw-section__head h2 {
+  font-family: var(--dw-font-body);
+  font-size: 11.5px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: var(--dw-ink-faint);
+}
+.dw-tools { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; }
+.dw-section__label, .dw-section__title, .dw-section__hint { display: none; }
+
+/* 灵感便签 */
+.dw-notes { column-gap: 12px; }
+.dw-note {
+  padding: 14px 15px;
+  background: rgba(255, 255, 255, 0.042);
+  background-image: none;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 14px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.045);
+  transform: none !important;
+  transition: background-color 0.2s var(--dw-ease), border-color 0.2s var(--dw-ease);
+}
+.dw-note:hover {
+  background: rgba(255, 255, 255, 0.062);
+  border-color: rgba(255, 255, 255, 0.11);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.055);
+  transform: none;
+}
+.dw-note::before, .dw-note::after, .dw-note__tape, .dw-pin-note { display: none; }
+.dw-note__top { font-size: 10.5px; color: var(--dw-ink-faint); gap: 5px; }
+.dw-note__top .dw-face-mini { width: 18px; height: 18px; font-size: 9px; }
+.dw-note__text { margin: 10px 0 12px; font-size: 13.5px; line-height: 1.68; color: var(--dw-ink); }
+.dw-note__time { color: var(--dw-ink-faint); }
+.dw-note__foot { border-top-color: var(--dw-rule-soft); padding-top: 9px; }
+.dw-note__expand { color: var(--dw-ink-faint); font-size: 11px; }
+.dw-note__expand:hover { color: var(--dw-ink); }
+.dw-note.is-open { background: rgba(255, 255, 255, 0.058); }
+.dw-note.is-pinned { border-color: rgba(185, 184, 255, 0.34); }
+.dw-react {
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.035);
+  color: var(--dw-ink-faint);
+  padding: 3px 8px;
+  gap: 5px;
+  font-size: 10.5px;
+}
+.dw-react:hover { background: rgba(255, 255, 255, 0.075); color: var(--dw-ink); }
+.dw-react.is-mine { border-color: rgba(185, 184, 255, 0.45); background: rgba(185, 184, 255, 0.13); color: var(--dw-red-deep); }
+.dw-react__label { display: none; }
+.dw-chip { background: rgba(255, 255, 255, 0.06); color: var(--dw-ink-faint); border-color: rgba(255, 255, 255, 0.08); }
+.dw-actions { border-top-color: var(--dw-rule-soft); }
+.dw-linkbtn { color: var(--dw-ink-faint); }
+.dw-linkbtn:hover { color: var(--dw-ink); }
+
+/* 待办：行式列表 */
+.dw-cards { gap: 0; }
+.dw-todo {
+  padding: 13px 2px;
+  background: transparent;
+  background-image: none;
+  border: 0;
+  border-bottom: 1px solid var(--dw-rule-soft);
+  border-radius: 0;
+  box-shadow: none;
+  cursor: default;
+}
+.dw-todo:last-child { border-bottom: 0; }
+.dw-todo:hover { background: rgba(255, 255, 255, 0.025); box-shadow: none; transform: none; }
+.dw-todo::before { display: none; }
+.dw-todo.is-done { opacity: 0.62; }
+.dw-todo__top { color: var(--dw-ink-faint); font-size: 10.5px; gap: 5px; }
+.dw-todo__top .dw-face-mini { width: 18px; height: 18px; font-size: 9px; }
+.dw-todo__text { margin: 8px 0 9px; font-size: 13px; line-height: 1.68; color: var(--dw-ink); }
+.dw-todo__line.is-done .dw-todo__line-text { color: var(--dw-ink-soft); text-decoration-color: rgba(185, 184, 255, 0.65); }
+.dw-todo__foot { border-top-color: transparent; padding-top: 2px; opacity: 0.75; }
+.dw-todo:hover .dw-todo__foot, .dw-todo:focus-within .dw-todo__foot { opacity: 1; }
+.dw-todo__status { border-color: rgba(255, 255, 255, 0.22); background: transparent; color: var(--dw-ink-faint); }
+.dw-todo__status:hover { border-color: rgba(255, 255, 255, 0.45); }
+.dw-todo__status.is-doing { color: #2a2418; border-color: var(--dw-amber); background: var(--dw-amber); }
+.dw-todo__status.is-done { color: #19172a; border-color: var(--dw-red); background: var(--dw-red); }
+.dw-todo__line .dw-todo__status { width: 17px; height: 17px; font-size: 10px; }
+
+/* 匿名信箱：bone well */
+.dw-mailbox {
+  padding: 14px;
+  background-color: var(--dw-well);
+  background-image: none;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 18px;
+  box-shadow: 0 30px 70px -46px rgba(0, 0, 0, 0.95);
+  color: var(--dw-well-ink);
+}
+.dw-slot { display: none; }
+.dw-letters { gap: 8px; }
+.dw-letter {
+  background: var(--dw-card-light);
+  background-image: none;
+  border: 1px solid var(--dw-well-rule);
+  border-radius: 12px;
+  padding: 13px 14px;
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.03);
+  color: var(--dw-well-ink);
+}
+.dw-letter::before, .dw-letter::after, .dw-letter__flap, .dw-letter__seal { display: none; }
+.dw-letter:hover { transform: none; box-shadow: 0 1px 0 rgba(0, 0, 0, 0.04); }
+.dw-letter.is-open { background: #ffffff; }
+.dw-letter__head { color: var(--dw-well-muted); font-size: 10px; }
+.dw-letter__text { color: var(--dw-well-ink); font-size: 12.5px; line-height: 1.7; }
+.dw-letter__foot { border-top: 1px solid var(--dw-well-rule); padding-top: 8px; }
+.dw-letter__foot .dw-react { border-color: var(--dw-well-rule); background: var(--dw-well-2); color: var(--dw-well-muted); }
+.dw-letter__foot .dw-react:hover { background: #e0dbd1; color: var(--dw-well-ink); }
+.dw-letter__foot .dw-react.is-mine { border-color: rgba(120, 116, 200, 0.5); background: rgba(185, 184, 255, 0.3); color: #2b2854; }
+.dw-letter__foot .dw-linkbtn { color: var(--dw-well-muted); }
+.dw-letter__foot .dw-linkbtn:hover { color: var(--dw-well-ink); }
+.dw-letter__stamp-line { color: var(--dw-well-muted); border-top-color: var(--dw-well-rule); }
+.dw-mood { border-radius: 999px; border: 1px solid transparent; background: var(--dw-well-2); color: var(--dw-well-muted); font-size: 9.5px; }
+.dw-mood--casual, .dw-mood--suggest, .dw-mood--worry, .dw-mood--vent { background: var(--dw-well-2); color: var(--dw-well-muted); }
+.dw-mailbox .dw-empty strong { color: var(--dw-well-ink); }
+.dw-mailbox .dw-empty .dw-btn { background: transparent; border-color: var(--dw-well-rule); color: var(--dw-well-muted); }
+.dw-mailbox .dw-empty .dw-btn--primary { background: var(--dw-red); border-color: transparent; color: #19172a; }
+.dw-mailbox .dw-hint, .dw-mailbox .dw-empty p { color: var(--dw-well-muted); }
+
+/* 团队脉搏 */
+.dw-pulse {
+  padding: 16px 2px 2px;
+  background: transparent;
+  background-image: none;
+  border: 0;
+  border-top: 1px solid var(--dw-rule);
+  border-radius: 0;
+  box-shadow: none;
+  gap: 6px 26px;
+}
+.dw-pulse__head { color: var(--dw-ink-faint); font-size: 11px; font-weight: 500; letter-spacing: 0; }
+.dw-legend { color: var(--dw-ink-faint); font-size: 9.5px; }
+.dw-dot--idea { background: var(--dw-red); }
+.dw-dot--todo { background: rgba(185, 184, 255, 0.45); }
+.dw-dot--opinion { background: var(--dw-amber); }
+.dw-dot--online { background: var(--dw-red); }
+.dw-week-wrap { border-right: 1px solid var(--dw-rule); padding-right: 20px; }
+.dw-week { border-bottom: 1px solid var(--dw-rule); }
+.dw-week__bar { border-radius: 4px 4px 2px 2px; opacity: 0.9; }
+.dw-week__bar--ideas { background: var(--dw-red); }
+.dw-week__bar--todos { background: rgba(185, 184, 255, 0.42); }
+.dw-week__bar--opinions { background: var(--dw-amber); }
+.dw-week__label { color: var(--dw-ink-faint); font-size: 8.5px; }
+.dw-stats > div:nth-child(2) { border-top-color: var(--dw-rule); }
+.dw-stat__label { color: var(--dw-ink-faint); font-size: 10px; letter-spacing: 0.02em; }
+.dw-stat__value { font-family: var(--dw-font-display); font-weight: 500; color: var(--dw-ink); letter-spacing: -0.02em; }
+.dw-stat__unit { color: var(--dw-ink-faint); }
+.dw-ring { background: conic-gradient(var(--dw-red) var(--dw-ratio), rgba(255, 255, 255, 0.09) 0); }
+.dw-ring::before { background: var(--dw-paper); }
+.dw-ring__label { color: var(--dw-ink); }
+.dw-meter { color: var(--dw-ink-faint); }
+.dw-members-wrap { border-left-color: var(--dw-rule); }
+.dw-member { color: var(--dw-ink-faint); }
+.dw-member__name { color: var(--dw-ink-soft); }
+.dw-member__bar { background: rgba(255, 255, 255, 0.09); }
+.dw-member__bar i { background: var(--dw-red); }
+.dw-member__count { color: var(--dw-ink-faint); }
+
+/* 浮起主按钮 */
+.dw-fab {
+  right: 24px;
+  bottom: 24px;
+  min-height: 40px;
+  padding: 0 18px;
+  border-radius: 999px;
+  background: var(--dw-red);
+  color: #19172a;
+  font-family: var(--dw-font-body);
+  font-size: 12px;
+  font-weight: 600;
+  border: 1px solid transparent;
+  box-shadow: 0 18px 32px -18px rgba(0, 0, 0, 0.9), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+.dw-fab:hover { background: #cbc9ff; transform: translateY(-1px); }
+.dw-fab__plus { font-size: 15px; line-height: 1; }
+
+/* 更新条与离线提示 */
+.dw-update {
+  margin-bottom: 12px;
+  border: 1px solid rgba(185, 184, 255, 0.24);
+  border-radius: 12px;
+  background: rgba(185, 184, 255, 0.09);
+  color: var(--dw-ink-soft);
+  font-size: 11.5px;
+}
+.dw-update__msg { color: var(--dw-ink-faint); }
+.dw-banner {
+  border: 1px solid rgba(255, 210, 161, 0.28);
+  border-radius: 12px;
+  background: rgba(255, 210, 161, 0.09);
+  color: var(--dw-amber);
+  font-size: 11px;
+}
+.dw-loading { color: var(--dw-ink-faint); }
+.dw-loading__dot { background: var(--dw-red); }
+
+/* 模态 / 合成器 / 名片 */
+.dw-scrim { background: rgba(6, 6, 12, 0.62); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); }
+.dw-card {
+  background: var(--dw-glass);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  border-radius: 18px;
+  box-shadow: var(--dw-glass-hi), 0 44px 90px -44px rgba(0, 0, 0, 0.95);
+  -webkit-backdrop-filter: blur(26px) saturate(1.3);
+  backdrop-filter: blur(26px) saturate(1.3);
+  color: var(--dw-ink);
+}
+.dw-card::before, .dw-card--sheet::before { display: none; }
+.dw-card__kicker, .dw-card__desc { display: none; }
+.dw-card__title { font-family: var(--dw-font-display); font-weight: 500; letter-spacing: -0.02em; color: var(--dw-ink); }
+.dw-close {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--dw-ink-faint);
+}
+.dw-close:hover { background: rgba(255, 255, 255, 0.07); color: var(--dw-ink); }
+.dw-tabs {
+  display: flex;
+  gap: 20px;
+  border-bottom: 1px solid var(--dw-rule);
+  padding: 0;
+  margin: 14px 0 16px;
+  background: transparent;
+  border-radius: 0;
+}
+.dw-tab {
+  position: relative;
+  padding: 8px 0 10px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--dw-ink-faint);
+  font-size: 12px;
+  font-weight: 500;
+}
+.dw-tab.is-active { color: var(--dw-ink); background: transparent; box-shadow: none; }
+.dw-tab.is-active::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -4px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--dw-red);
+  transform: translateX(-50%);
+}
+.dw-tab__num { display: none; }
+.dw-field { gap: 7px; }
+.dw-field__label { display: none; }
+.dw-input, .dw-textarea {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+  color: var(--dw-ink);
+  caret-color: var(--dw-red);
+}
+.dw-input::placeholder, .dw-textarea::placeholder { color: var(--dw-ink-faint); }
+.dw-input:focus, .dw-textarea:focus { border-color: rgba(185, 184, 255, 0.55); box-shadow: 0 0 0 3px rgba(185, 184, 255, 0.10); background: rgba(255, 255, 255, 0.07); outline: none; }
+.dw-counter, .dw-anon-note, .dw-hint { display: none; }
+.dw-form-foot { border-top: 1px solid var(--dw-rule-soft); }
+.dw-moods { gap: 7px; }
+.dw-mood-btn {
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.035);
+  color: var(--dw-ink-faint);
+  font-size: 11px;
+}
+.dw-mood-btn.is-active { border-color: rgba(185, 184, 255, 0.45); background: rgba(185, 184, 255, 0.14); color: var(--dw-red-deep); }
+.dw-emoji {
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.035);
+}
+.dw-emoji.is-active { border-color: var(--dw-red); background: rgba(185, 184, 255, 0.14); }
+.dw-error { color: var(--dw-amber); background: rgba(255, 210, 161, 0.09); border: 1px solid rgba(255, 210, 161, 0.22); border-radius: 10px; padding: 7px 9px; }
+.dw-empty strong { color: var(--dw-ink-soft); font-weight: 500; }
+.dw-empty p { display: none; }
+.dw-empty__actions { margin-top: 10px; }
+
+/* Toast */
+.dw-toast {
+  background: rgba(32, 31, 42, 0.94);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  border-radius: 999px;
+  color: var(--dw-ink-soft);
+  box-shadow: 0 24px 48px -30px rgba(0, 0, 0, 0.9);
+}
+.dw-toast__action { color: var(--dw-red-deep); }
+
+/* 晨报 */
+.dw-paper {
+  background: var(--dw-glass);
+  background-image: none;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 18px;
+  box-shadow: var(--dw-glass-hi), 0 44px 90px -48px rgba(0, 0, 0, 0.95);
+  color: var(--dw-ink);
+  -webkit-backdrop-filter: blur(24px) saturate(1.2);
+  backdrop-filter: blur(24px) saturate(1.2);
+}
+.dw-paper__kicker, .dw-paper__meta { color: var(--dw-ink-faint); }
+.dw-paper__title { font-family: var(--dw-font-display); font-weight: 500; letter-spacing: -0.02em; color: var(--dw-ink); }
+.dw-paper__label { color: var(--dw-ink-faint); font-size: 10px; letter-spacing: 0.02em; }
+.dw-paper__label::after { background: var(--dw-rule); }
+.dw-paper__headline { color: var(--dw-ink); }
+.dw-paper__byline, .dw-paper__empty { color: var(--dw-ink-faint); }
+.dw-paper__row { border-top-color: var(--dw-rule-soft); color: var(--dw-ink-soft); }
+.dw-paper__row .dw-who { color: var(--dw-ink-faint); }
+.dw-paper__stat b { color: var(--dw-ink); }
+.dw-paper__stat span { color: var(--dw-ink-faint); }
+.dw-paper__cols { border-color: var(--dw-rule); }
+.dw-week-wrap .dw-paper__row, .dw-members-wrap .dw-paper__row { border-color: var(--dw-rule-soft); }
+.dw-paper__foot { border-top-color: var(--dw-rule); }
+
+/* 杂项 */
+.dw-legend i.dw-dot { margin-right: 3px; }
+.dw-note.is-done .dw-note__text { text-decoration: none; }
+.dw-legend span { color: var(--dw-ink-faint); }
+.dw-chip--demo { background: rgba(255, 210, 161, 0.12); color: var(--dw-amber); border-color: rgba(255, 210, 161, 0.24); }
+.dw-mood--suggest { border-color: rgba(255, 210, 161, 0.3); }
+.dw-btn__label { white-space: nowrap; }
+
+
+/* Dusk refinements */
+.dw-root {
+  background-image:
+    radial-gradient(78% 52% at 8% -14%, rgba(185, 184, 255, 0.22), transparent 64%),
+    radial-gradient(58% 40% at 98% -12%, rgba(255, 210, 161, 0.16), transparent 58%),
+    linear-gradient(180deg, #1e1d29 0%, var(--dw-paper) 42%, #0e0e15 100%);
+}
+.dw-todo__foot {
+  opacity: 0;
+  transition: opacity 0.16s var(--dw-ease);
+}
+.dw-todo:hover .dw-todo__foot,
+.dw-todo:focus-within .dw-todo__foot { opacity: 1; }
+@media (hover: none) {
+  .dw-todo__foot { opacity: 0.8; }
+}
+.dw-note__expand {
+  padding: 1px 6px;
+  font-size: 16px;
+  line-height: 1;
+  text-decoration: none;
+}
+.dw-letter__foot .dw-linkbtn {
+  font-size: 15px;
+  line-height: 1;
+  text-decoration: none;
+}
+.dw-form-foot { justify-content: flex-end; }
+.dw-morning { background: rgba(6, 6, 12, 0.66); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); }
+.dw-morning__bar .dw-btn {
+  min-height: 32px;
+  border: 1px solid rgba(255, 255, 255, 0.11);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.045);
+  color: var(--dw-ink-soft);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+.dw-morning__bar .dw-btn:hover { background: rgba(255, 255, 255, 0.09); color: var(--dw-ink); }
+.dw-morning__bar .dw-btn--primary { background: var(--dw-red); border-color: transparent; color: #19172a; }
+.dw-morning__page { color: var(--dw-ink-faint); font-family: var(--dw-font-body); font-size: 11px; }
+.dw-paper__title { font-size: clamp(32px, 4.6cqw, 52px); }
+.dw-paper__meta { font-size: 10px; }
+
+
+/* Dusk: slate below the light, no glow behind the glass */
+.dw-root {
+  background-image: linear-gradient(180deg, #1b1b24 0%, #14141c 46%, #101017 100%);
+}
+
 `;
 
 
@@ -2575,45 +3118,31 @@ window.__ModuleLoader__.load({
       );
     }
 
-    function Presence({ members, online, t, lang }) {
+    function Presence({ members, online, t }) {
       const onlineIds = new Set(online.map((member) => member.id));
       const people = members.filter((member) => member.demo !== true);
-      const shown = people.length > 0 ? people.slice(0, 5) : members.slice(0, 5);
-      const onlineCount = people.filter((member) => onlineIds.has(member.id)).length;
+      const shown = (people.length > 0 ? people : members).slice(0, 5);
       return h(
         'div',
-        { className: 'dw-presence', role: 'group', 'aria-label': t('online') },
+        { className: 'dw-presence', role: 'group', 'aria-label': `${online.length} ${t('online')}` },
         shown.map((member) => h(Face, { key: member.id, member, online: onlineIds.has(member.id) })),
-        h('span', { className: 'dw-people-count' }, lang === 'zh' ? `${onlineCount} 人在墙上` : `${onlineCount} online`),
       );
     }
 
-    function SectionHead({ num, tag, title, hint, tools }) {
+    function SectionHead({ title, tools }) {
       return h(
         'header',
         { className: 'dw-section__head' },
-        h(
-          'div',
-          { className: 'dw-section__label' },
-          h('span', { className: 'dw-num' }, num),
-          tag ? h('span', { className: 'dw-tag' }, tag) : null,
-        ),
-        h(
-          'div',
-          { className: 'dw-section__title' },
-          h('h2', null, title),
-          h('span', { className: 'dw-section__hint' }, hint),
-        ),
+        h('h2', null, title),
         tools && tools.length > 0 ? h('div', { className: 'dw-tools' }, tools) : null,
       );
     }
 
-    function EmptyBox({ title, desc, actions }) {
+    function EmptyBox({ title, actions }) {
       return h(
         'div',
         { className: 'dw-empty' },
         h('strong', null, title),
-        h('p', null, desc),
         actions && actions.length > 0 ? h('div', { className: 'dw-empty__actions' }, actions) : null,
       );
     }
@@ -2782,7 +3311,6 @@ window.__ModuleLoader__.load({
                 title: reaction.label,
               },
               h('span', { 'aria-hidden': 'true' }, reaction.icon),
-              h('span', { className: 'dw-react__label' }, reaction.label),
               h('span', { className: 'dw-react__count' }, String(idea.reactions?.[reaction.kind]?.count ?? 0)),
             ),
           ),
@@ -2791,12 +3319,14 @@ window.__ModuleLoader__.load({
             {
               type: 'button',
               className: 'dw-note__expand',
+              title: open ? t('close') : t('open'),
+              'aria-label': open ? t('close') : t('open'),
               onClick: (event) => {
                 event.stopPropagation();
                 actions.toggleOpenIdea(idea.id);
               },
             },
-            open ? t('close') : t('open'),
+            open ? '⌃' : '⌄',
           ),
         ),
         open
@@ -2833,7 +3363,7 @@ window.__ModuleLoader__.load({
 
     }
 
-    function IdeasSection({ data, t, lang, me, actions, openIdeaId, onCompose, onDemo, onClearDemo, hasDemo }) {
+    function IdeasSection({ data, t, lang, me, actions, openIdeaId, onCompose, onDemo }) {
       function drawOne() {
         const pool = data.ideas;
         if (pool.length === 0) {
@@ -2847,18 +3377,12 @@ window.__ModuleLoader__.load({
         'section',
         { className: 'dw-section dw-section--ideas dw-in' },
         h(SectionHead, {
-          num: '01',
-          tag: 'IDEAS',
           title: t('ideas'),
-          hint: t('ideasHint'),
           tools: [
             h('button', { key: 'draw', type: 'button', className: 'dw-btn dw-btn--small dw-btn--quiet', onClick: drawOne }, t('drawIdea')),
             h('button', { key: 'add', type: 'button', className: 'dw-btn dw-btn--small', onClick: () => onCompose('idea') }, `＋ ${t('addIdea')}`),
           ],
         }),
-        hasDemo && data.ideas.length > 0
-          ? h('div', { className: 'dw-banner' }, t('demoBanner'), h('span', { style: { flex: 1 } }), h(Strike, { label: t('clearDemo'), onClick: onClearDemo }))
-          : null,
         data.ideas.length === 0
           ? h(EmptyBox, {
               title: t('emptyIdeasTitle'),
@@ -3006,10 +3530,7 @@ window.__ModuleLoader__.load({
         'section',
         { className: 'dw-section dw-section--todos dw-in' },
         h(SectionHead, {
-          num: '02',
-          tag: 'TODOS',
           title: t('todos'),
-          hint: t('todosHint'),
           tools: [h('button', { key: 'add', type: 'button', className: 'dw-btn dw-btn--small', onClick: () => onCompose('todo') }, `＋ ${t('addTodo')}`)],
         }),
         data.todos.length === 0
@@ -3044,10 +3565,7 @@ window.__ModuleLoader__.load({
         'section',
         { className: 'dw-section dw-section--echo dw-in' },
         h(SectionHead, {
-          num: '03',
-          tag: 'ECHO',
           title: t('echo'),
-          hint: t('echoHint'),
           tools: [
             h('button', { key: 'draw', type: 'button', className: 'dw-btn dw-btn--small dw-btn--quiet', onClick: drawLetter }, t('drawLetter')),
             h('button', { key: 'write', type: 'button', className: 'dw-btn dw-btn--small', onClick: () => onCompose('opinion') }, `＋ ${t('writeLetter')}`),
@@ -3101,13 +3619,14 @@ window.__ModuleLoader__.load({
                         },
                         h('span', { 'aria-hidden': 'true' }, '≈'),
                         h('span', { className: 'dw-react__count' }, String(opinion.reactions?.echo?.count ?? 0)),
-                        h('span', null, t('echoSecond')),
                       ),
                       h('button', {
                         type: 'button',
                         className: 'dw-linkbtn',
+                        title: open ? t('fold') : t('read'),
+                        'aria-label': open ? t('fold') : t('read'),
                         onClick: () => setOpenId(open ? null : opinion.id),
-                      }, open ? t('fold') : t('read')),
+                      }, open ? '⌃' : '⌄'),
                       open
                         ? h('button', {
                             type: 'button',
@@ -3122,9 +3641,8 @@ window.__ModuleLoader__.load({
                             },
                           }, deleteConfirmId === opinion.id ? t('confirmDelete') : t('delete'))
                         : null,
-                      h('span', { className: 'dw-letter__seal' }, t('anonSeal')),
                     ),
-                    open ? h('p', { className: 'dw-letter__stamp-line' }, `${fullTime(opinion.createdAt, lang)} · ${t('anonymous')}`) : null,
+                    open ? h('p', { className: 'dw-letter__stamp-line' }, fullTime(opinion.createdAt, lang)) : null,
                   );
                 }),
               ),
@@ -3144,7 +3662,7 @@ window.__ModuleLoader__.load({
       return h(
         'section',
         { className: 'dw-section dw-section--pulse dw-in' },
-        h(SectionHead, { num: '04', tag: 'PULSE', title: t('pulse'), hint: t('pulseHint') }),
+        h(SectionHead, { title: t('pulse') }),
         h(
           'div',
           { className: 'dw-pulse' },
@@ -3272,7 +3790,6 @@ window.__ModuleLoader__.load({
             h(
               'div',
               null,
-              h('p', { className: 'dw-card__kicker' }, `NEW PIN · ${lang === 'zh' ? '钉一钉' : 'DING'}`),
               h('h2', { className: 'dw-card__title', id: 'dw-composer-title' }, titles[type]),
             ),
             h('button', { type: 'button', className: 'dw-close', onClick: onClose, 'aria-label': t('close') }, '×'),
@@ -3281,9 +3798,9 @@ window.__ModuleLoader__.load({
             'div',
             { className: 'dw-tabs', role: 'tablist', 'aria-label': t('newPin') },
             [
-              { key: 'idea', label: t('idea'), num: '1' },
-              { key: 'todo', label: t('todo'), num: '2' },
-              { key: 'opinion', label: t('opinion'), num: '3' },
+              { key: 'idea', label: t('idea') },
+              { key: 'todo', label: t('todo') },
+              { key: 'opinion', label: t('opinion') },
             ].map((tab) =>
               h(
                 'button',
@@ -3295,7 +3812,6 @@ window.__ModuleLoader__.load({
                   className: cx('dw-tab', type === tab.key && 'is-active'),
                   onClick: () => onChange({ type: tab.key }),
                 },
-                h('span', { className: 'dw-tab__num' }, tab.num),
                 tab.label,
               ),
             ),
@@ -3303,11 +3819,6 @@ window.__ModuleLoader__.load({
           h(
             'div',
             { className: 'dw-field' },
-            h(
-              'label',
-              { className: 'dw-field__label', htmlFor: 'dw-composer-text' },
-              type === 'opinion' ? (lang === 'zh' ? '信的内容' : 'Letter') : (lang === 'zh' ? '写下内容' : 'Your note'),
-            ),
             h('textarea', {
               id: 'dw-composer-text',
               ref: textareaRef,
@@ -3315,9 +3826,9 @@ window.__ModuleLoader__.load({
               value: composer.text,
               maxLength: max,
               placeholder: placeholders[type],
+              'aria-label': titles[type],
               onChange: (event) => onChange({ text: event.target.value }),
             }),
-            h('div', { className: 'dw-counter' }, `${composer.text.length} / ${max}`),
           ),
           type === 'opinion'
             ? h(
@@ -3326,7 +3837,6 @@ window.__ModuleLoader__.load({
                 h(
                   'div',
                   { className: 'dw-field' },
-                  h('span', { className: 'dw-field__label' }, lang === 'zh' ? '语气' : 'Tone'),
                   h(
                     'div',
                     { className: 'dw-moods' },
@@ -3344,14 +3854,12 @@ window.__ModuleLoader__.load({
                     ),
                   ),
                 ),
-                h('p', { className: 'dw-anon-note' }, t('anonymousNote')),
               )
             : null,
           error ? h('p', { className: 'dw-error', style: { marginTop: 8 } }, error) : null,
           h(
             'div',
             { className: 'dw-form-foot' },
-            h('span', { className: 'dw-hint' }, t('composerHint')),
             h(
               'button',
               { type: 'button', className: 'dw-btn dw-btn--primary', onClick: onSubmit, disabled: busy },
@@ -3381,17 +3889,14 @@ window.__ModuleLoader__.load({
             h(
               'div',
               null,
-              h('p', { className: 'dw-card__kicker' }, `WALL ACCESS · ${lang === 'zh' ? '认领名片' : 'CLAIM A CARD'}`),
               h('h2', { className: 'dw-card__title', id: 'dw-identity-title' }, me ? t('identityEditTitle') : t('identityTitle')),
             ),
             canClose ? h('button', { type: 'button', className: 'dw-close', onClick: onClose, 'aria-label': t('close') }, '×') : null,
           ),
-          h('p', { className: 'dw-card__desc' }, t('identityDesc')),
           quick.length > 0 && !me
             ? h(
                 'div',
                 { className: 'dw-field' },
-                h('span', { className: 'dw-field__label' }, lang === 'zh' ? '墙上有这些名片，是你就点一下' : 'Existing cards — pick yours'),
                 h(
                   'div',
                   { className: 'dw-moods' },
@@ -3408,20 +3913,19 @@ window.__ModuleLoader__.load({
           h(
             'div',
             { className: 'dw-field' },
-            h('label', { className: 'dw-field__label', htmlFor: 'dw-identity-name' }, t('nameLabel')),
             h('input', {
               id: 'dw-identity-name',
               className: 'dw-input',
               value: name,
               maxLength: 24,
               placeholder: t('namePlaceholder'),
+              'aria-label': t('nameLabel'),
               onChange: (event) => setName(event.target.value),
             }),
           ),
           h(
             'div',
             { className: 'dw-field' },
-            h('span', { className: 'dw-field__label' }, t('emojiLabel')),
             h(
               'div',
               { className: 'dw-emoji-grid', role: 'radiogroup', 'aria-label': t('emojiLabel') },
@@ -3445,7 +3949,6 @@ window.__ModuleLoader__.load({
           h(
             'div',
             { className: 'dw-form-foot' },
-            h('span', { className: 'dw-hint' }, lang === 'zh' ? '可以随时改' : 'You can change it anytime'),
             h(
               'button',
               { type: 'button', className: 'dw-btn dw-btn--primary', disabled: busy, onClick: () => onSave({ name, emoji }) },
@@ -3471,19 +3974,16 @@ window.__ModuleLoader__.load({
             h(
               'div',
               null,
-              h('p', { className: 'dw-card__kicker' }, t('connectKicker')),
               h('h2', { className: 'dw-card__title', id: 'dw-connect-title' }, t('connectTitle')),
             ),
             null,
           ),
-          h('p', { className: 'dw-card__desc' }, t('connectDesc')),
           serverHost
             ? h('p', { className: 'dw-hint', style: { marginTop: 6 } }, `${t('connectTarget')}${serverHost}`)
             : null,
           h(
             'div',
-            { className: 'dw-field', style: { marginTop: 18 } },
-            h('label', { className: 'dw-field__label', htmlFor: 'dw-access-code' }, t('accessCodeLabel')),
+            { className: 'dw-field', style: { marginTop: 12 } },
             h('input', {
               id: 'dw-access-code',
               className: 'dw-input',
@@ -3492,6 +3992,7 @@ window.__ModuleLoader__.load({
               autoFocus: true,
               autoComplete: 'current-password',
               placeholder: t('accessCodePlaceholder'),
+              'aria-label': t('accessCodeLabel'),
               onChange: (event) => onCode(event.target.value),
               onKeyDown: (event) => {
                 if (event.key === 'Enter') {
@@ -3505,7 +4006,6 @@ window.__ModuleLoader__.load({
           h(
             'div',
             { className: 'dw-form-foot' },
-            h('span', { className: 'dw-hint' }, t('noAccessCode')),
             h(
               'button',
               { type: 'button', className: 'dw-btn dw-btn--primary', disabled: busy, onClick: onSubmit },
@@ -3679,20 +4179,13 @@ window.__ModuleLoader__.load({
         h(
           'div',
           { className: 'dw-paper' },
-          h('p', { className: 'dw-paper__kicker' }, t('morningTitle')),
-          h('h2', { className: 'dw-paper__title' }, t('subtitle')),
+          h('h2', { className: 'dw-paper__title' }, t('morningShort')),
           h(
             'p',
             { className: 'dw-paper__meta' },
-            `${todayLabel(lang)} · ${lang === 'zh' ? `第 ${dayOfYear} 期` : `Issue ${dayOfYear}`} · ${t('morningEditor')}`,
+            `${todayLabel(lang)} · ${lang === 'zh' ? `第 ${dayOfYear} 期` : `Issue ${dayOfYear}`}`,
           ),
           pages.map((content, index) => (index === current ? content : null)),
-          h(
-            'div',
-            { className: 'dw-paper__foot' },
-            h('span', null, lang === 'zh' ? '晨报由墙上的纸片自动生成' : 'Auto-composed from the wall'),
-            h('span', null, '← / → 翻页 · Esc 退出'),
-          ),
         ),
         h(
           'div',
@@ -4346,17 +4839,22 @@ window.__ModuleLoader__.load({
                 h(
                   'div',
                   { className: 'dw-head-right' },
-                  h('span', { className: 'dw-date' }, todayLabel(lang)),
                   h(
                     'div',
                     { className: 'dw-head-actions' },
-                    h(Presence, { members: snapshot.members, online, me, t, lang }),
+                    hasDemo
+                      ? h(
+                          'button',
+                          { type: 'button', className: 'dw-btn dw-btn--quiet dw-btn--small', onClick: clearDemo },
+                          lang === 'zh' ? '清除示例' : 'Clear demo',
+                        )
+                      : null,
+                    h(Presence, { members: snapshot.members, online, me, t }),
                     h(
                       'button',
-                      { type: 'button', className: 'dw-btn dw-btn--ink', onClick: openMorning },
+                      { type: 'button', className: 'dw-btn', onClick: openMorning },
                       '☀ ',
                       h('span', { className: 'dw-btn__label' }, t('morning')),
-                      h('span', { className: 'dw-kbd' }, 'M'),
                     ),
                     h(
                       'button',
@@ -4394,7 +4892,6 @@ window.__ModuleLoader__.load({
                     )
                   : null,
                 connection === 'reconnecting' ? h('div', { className: 'dw-banner' }, t('offline')) : null,
-                hasDemo ? h('div', { className: 'dw-demo' }, t('demoBanner'), h('span', { style: { flex: 1 } }), h(Strike, { label: t('clearDemo'), onClick: clearDemo })) : null,
                 h(
                   'div',
                   { className: 'dw-grid' },
@@ -4407,8 +4904,6 @@ window.__ModuleLoader__.load({
                     openIdeaId,
                     onCompose: openComposer,
                     onDemo: seedDemo,
-                    onClearDemo: clearDemo,
-                    hasDemo: false,
                   }),
                   h(TodosSection, { data: snapshot, t, lang, me, actions, onCompose: openComposer }),
                   h(
@@ -4417,18 +4912,6 @@ window.__ModuleLoader__.load({
                     h(EchoSection, { data: snapshot, t, lang, actions, onCompose: openComposer }),
                     h(PulseSection, { data: snapshot, t, lang, me, online }),
                   ),
-                ),
-                h(
-                  'footer',
-                  { className: 'dw-foot' },
-                  h(
-                    'span',
-                    { className: 'dw-foot__mode' },
-                    h('span', { className: 'dw-dot dw-dot--online' }),
-                    config ? (config.shared ? t('sharedMode') : t('localMode')) : t('localMode'),
-                    config ? ` · ${config.shared ? t('sharedHint') : t('localHint')}` : '',
-                  ),
-                  h('span', null, t('footerHint')),
                 ),
               ),
               h(
