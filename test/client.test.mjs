@@ -181,3 +181,120 @@ test('manifest 与展示资源：补丁、client 导出、双语 meta、图标�
   assert.ok(icon.length < 256 * 1024);
   assert.match(icon.toString('utf8').slice(0, 120), /<svg/);
 });
+
+/* ---------------------------------------------- 预订日历 */
+
+const BOOK_BLOCK = (() => {
+  const start = SOURCE.indexOf('/* @dw-bookings:start */');
+  const end = SOURCE.indexOf('/* @dw-bookings:end */');
+  assert.ok(start >= 0 && end > start, 'client.js 必须有 @dw-bookings 编解码块');
+  return SOURCE.slice(start, end);
+})();
+
+function loadBookingsModule() {
+  const factory = new Function(
+    BOOK_BLOCK +
+      'return { BOOK_TAG, encodeBooking, decodeBooking, splitBookings, monthGrid, conflictsOf, overlapsWith, hasConflict, bookingsOn, minutesOf, rangeLabel, isDateKey, keyOfDate, BOOK_START_TIMES, BOOK_END_TIMES, timeChoices };',
+  );
+  return factory();
+}
+
+test('预订编解码：进得去出得来，内容里的竖线也不会丢', () => {
+  const api = loadBookingsModule();
+  const text = api.encodeBooking({ date: '2026-11-24', start: '09:00', end: '10:30', text: '和客户对需求 | 带原型' });
+  const booking = api.decodeBooking({ id: 'i1', authorId: 'm1', createdAt: '2026-11-24T01:00:00.000Z', text });
+  assert.ok(booking);
+  assert.equal(booking.date, '2026-11-24');
+  assert.equal(booking.start, '09:00');
+  assert.equal(booking.end, '10:30');
+  assert.equal(booking.text, '和客户对需求 | 带原型');
+  assert.equal(booking.authorId, 'm1');
+  assert.equal(booking.id, 'i1');
+});
+
+test('预订解析：普通便签不被吞掉，坏记录退回便签', () => {
+  const api = loadBookingsModule();
+  assert.equal(api.decodeBooking({ id: 'a', text: '普通便签' }), null);
+  assert.equal(api.decodeBooking({ id: 'b', text: api.BOOK_TAG + '2026-11-24|10:00|09:00|倒着的时间' }), null);
+  assert.equal(api.decodeBooking({ id: 'c', text: api.BOOK_TAG + '2026-02-31|09:00|10:00|不存在的日期' }), null);
+  const split = api.splitBookings([
+    { id: 'a', text: '普通便签' },
+    { id: 'b', text: api.encodeBooking({ date: '2026-11-25', start: '14:00', end: '15:00', text: '评审' }) },
+  ]);
+  assert.equal(split.ideas.length, 1);
+  assert.equal(split.bookings.length, 1);
+  assert.equal(split.ideas[0].id, 'a');
+});
+
+test('预订冲突：同日重叠才算冲突，首尾相接不算', () => {
+  const api = loadBookingsModule();
+  const a = { id: 'a', date: '2026-11-24', start: '09:00', end: '10:00' };
+  assert.equal(api.overlapsWith(a, { id: 'b', date: '2026-11-24', start: '10:00', end: '11:00' }), false);
+  assert.equal(api.overlapsWith(a, { id: 'b', date: '2026-11-24', start: '09:30', end: '10:30' }), true);
+  assert.equal(api.overlapsWith(a, { id: 'b', date: '2026-11-25', start: '09:30', end: '10:30' }), false);
+  assert.equal(api.overlapsWith(a, { ...a }), false, '自己不算和自己冲突');
+  assert.equal(api.hasConflict([a, { id: 'b', date: '2026-11-24', start: '09:30', end: '10:30' }]), true);
+  assert.equal(api.hasConflict([a, { id: 'b', date: '2026-11-24', start: '10:00', end: '11:00' }]), false);
+});
+
+test('月历排布：周一在左，42 格，跨月补齐', () => {
+  const api = loadBookingsModule();
+  for (const [year, month] of [[2026, 10], [2026, 1], [2024, 1]]) {
+    const cells = api.monthGrid(year, month);
+    assert.equal(cells.length, 42);
+    assert.equal(new Date(cells[0].key + 'T00:00:00').getDay(), 1, '第一格必须是周一');
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    assert.equal(cells.filter((cell) => cell.inMonth).length, daysInMonth);
+    const firstIndex = cells.findIndex((cell) => cell.inMonth && cell.day === 1);
+    assert.ok(firstIndex >= 0 && firstIndex < 7, '每月 1 号必须落在第一行');
+    for (const cell of cells) assert.equal(api.isDateKey(cell.key), true);
+  }
+});
+
+test('日历界面：方块挂在信箱之后、心律之前，格子里只放时间段', () => {
+  const echoAt = SOURCE.indexOf('function EchoSection');
+  const calAt = SOURCE.indexOf('function CalendarSection');
+  const pulseAt = SOURCE.indexOf('function PulseSection');
+  assert.ok(echoAt > 0 && calAt > echoAt && pulseAt > calAt, '日历区块必须排在匿名信箱和团队心律之间');
+  assert.ok(SOURCE.includes("className: 'dw-cal'"), '必须有日历方框');
+  assert.ok(SOURCE.includes('dw-cal__chip'), '格子里必须显示时间段');
+  assert.ok(SOURCE.includes('dw-cal__week'), '必须有星期行');
+  assert.ok(SOURCE.includes('function CalendarSection'), '必须有日历组件');
+  assert.ok(SOURCE.includes('calendarConflictWarn'), '预订冲突要有提示');
+  assert.ok(SOURCE.includes('CalendarSection, { data: view'), '面板里必须挂上日历');
+  assert.ok(SOURCE.includes("className: 'dw-input dw-select'"), '起止时间必须是下拉选择');
+  assert.ok(!SOURCE.includes("type: 'time'"), '不要再用可手填的时间输入框');
+  const dict = applyPlugin().dictionaries['dsh-ding-wall'];
+  for (const key of ['calendar', 'calendarConflict', 'calendarConflictWarn', 'calendarWeekdays', 'calendarEmptyDay', 'calendarBookDay']) {
+    assert.equal(typeof dict.zh[key], 'string', 'zh.' + key);
+    assert.equal(typeof dict.en[key], 'string', 'en.' + key);
+  }
+});
+
+test('时间下拉：30 分钟一档，开始到 23:00、结束到 23:30，怎么选都还有合法的结束时间', () => {
+  const api = loadBookingsModule();
+  const starts = api.BOOK_START_TIMES;
+  const ends = api.BOOK_END_TIMES;
+  assert.equal(starts[0], '00:00');
+  assert.equal(starts[starts.length - 1], '23:00');
+  assert.equal(ends[0], '00:30');
+  assert.equal(ends[ends.length - 1], '23:30');
+  assert.equal(starts.length, 47);
+  assert.equal(ends.length, 47);
+  for (const value of starts.concat(ends)) assert.ok(api.minutesOf(value) >= 0, value);
+  assert.ok(api.minutesOf(ends[ends.length - 1]) > api.minutesOf(starts[starts.length - 1]), '最晚的开始时间之后仍然有结束时间');
+  for (let index = 1; index < starts.length; index += 1) {
+    assert.equal(api.minutesOf(starts[index]) - api.minutesOf(starts[index - 1]), 30, '节奏必须是 30 分钟');
+  }
+});
+
+test('时间下拉：历史手填的 09:15 也补进选项里，且不重复插入', () => {
+  const api = loadBookingsModule();
+  const starts = api.BOOK_START_TIMES;
+  const mixed = api.timeChoices(starts, '09:15');
+  assert.ok(mixed.includes('09:15'));
+  assert.equal(mixed[mixed.indexOf('09:15') - 1], '09:00');
+  assert.equal(mixed[mixed.indexOf('09:15') + 1], '09:30');
+  assert.equal(api.timeChoices(starts, '09:00'), starts, '已在列表里就原样返回');
+  assert.equal(api.timeChoices(starts, ''), starts, '空值不插入');
+});
