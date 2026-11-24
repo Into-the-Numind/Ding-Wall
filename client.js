@@ -177,6 +177,39 @@ window.__ModuleLoader__.load({
       loading: '正在打开这面墙…',
       retry: '重试',
       anonSeal: '没有署名',
+      calendar: '预订日历',
+      calendarHint: '谁在哪天哪段时间占了，扫一眼就知道，别撞车。',
+      calendarToday: '今天',
+      calendarPrev: '上个月',
+      calendarNext: '下个月',
+      calendarBook: '预订',
+      calendarBookDay: '预订这一天',
+      calendarEditTitle: '改这张预订',
+      calendarEmptyDay: '这一天还没有预订',
+      calendarDayHint: '点一天看当天安排',
+      calendarMonthCount: '本月 {n} 个预订',
+      calendarDate: '哪一天',
+      calendarStart: '开始',
+      calendarEnd: '结束',
+      calendarContent: '安排内容',
+      calendarContentPlaceholder: '例如：和客户对需求、用会议室 A 做评审',
+      calendarContentRequired: '写一下这段时间安排什么。',
+      calendarDateInvalid: '日期不对，重选一天。',
+      calendarTimeInvalid: '结束时间要晚于开始时间。',
+      calendarConflict: '冲突',
+      calendarConflictWith: '与 {who} 的 {range} 重叠',
+      calendarConflictWarn: '注意：这段时间和 {who} 的 {range} 重叠，仍然可以订。',
+      calendarSaved: '预订已上墙',
+      calendarSaving: '正在订…',
+      calendarUpdated: '预订已更新',
+      calendarRemoved: '预订已撤掉',
+      calendarMine: '我订的',
+      calendarRemove: '撤掉',
+      calendarNeedIdentity: '先认领一张名片，才能预订。',
+      calendarUnknownAuthor: '一位同事',
+      calendarDayKicker: '预订 · 这一天',
+      calendarFormKicker: '预订 · 填一张',
+      calendarWeekdays: '一,二,三,四,五,六,日',
     };
     const EN = {
       sidebarLabel: 'Ding Wall',
@@ -332,6 +365,39 @@ window.__ModuleLoader__.load({
       loading: 'Opening the wall…',
       retry: 'Retry',
       anonSeal: 'No signature',
+      calendar: 'Booking calendar',
+      calendarHint: 'See who holds which slot before you plan your own.',
+      calendarToday: 'Today',
+      calendarPrev: 'Previous month',
+      calendarNext: 'Next month',
+      calendarBook: 'Book',
+      calendarBookDay: 'Book this day',
+      calendarEditTitle: 'Edit booking',
+      calendarEmptyDay: 'Nothing booked this day',
+      calendarDayHint: 'Click a day to see its slots',
+      calendarMonthCount: '{n} booked this month',
+      calendarDate: 'Date',
+      calendarStart: 'From',
+      calendarEnd: 'To',
+      calendarContent: 'What is it',
+      calendarContentPlaceholder: 'e.g. client call, room A review',
+      calendarContentRequired: 'Say what happens in this slot.',
+      calendarDateInvalid: 'Pick a valid date.',
+      calendarTimeInvalid: 'End time must be after start time.',
+      calendarConflict: 'Overlap',
+      calendarConflictWith: 'Overlaps {who} · {range}',
+      calendarConflictWarn: 'Heads up: this overlaps {who} · {range}. You can still book it.',
+      calendarSaved: 'Booking pinned',
+      calendarSaving: 'Booking…',
+      calendarUpdated: 'Booking updated',
+      calendarRemoved: 'Booking removed',
+      calendarMine: 'mine',
+      calendarRemove: 'Remove',
+      calendarNeedIdentity: 'Claim a card before booking.',
+      calendarUnknownAuthor: 'A teammate',
+      calendarDayKicker: 'BOOKINGS · DAY',
+      calendarFormKicker: 'BOOKINGS · NEW',
+      calendarWeekdays: 'Mon,Tue,Wed,Thu,Fri,Sat,Sun',
     };
 
     /* ------------------------------------------------------------ 工具 */
@@ -400,6 +466,162 @@ window.__ModuleLoader__.load({
     function clamp(value, min, max) {
       return Math.min(max, Math.max(min, value));
     }
+    /* @dw-bookings:start */
+    /**
+     * 预订复用共享墙上已有的「便签」记录来存：团队墙服务端只认 ideas/todos/opinions，
+     * 加一个新接口就得重新部署服务端；用一条带标记的便签存预订，三位队友立刻能共享，
+     * 也不用改仓库外的那台墙服务。记录长这样：
+     *
+     *   ⟦DW-BOOK/1⟧2026-11-24|09:00|10:00|和客户对需求
+     *
+     * 渲染前把这批便签从「灵感便签」里摘出来，只放进日历，所以墙上看到的还是干净的。
+     * 想换成正规的 /bookings 接口时，只要替换本段里的 encode/decode 两个函数。
+     */
+    const BOOK_TAG = '⟦DW-BOOK/1⟧';
+    const BOOK_DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
+    const BOOK_TIME_RE = /^([01]\d|2[0-3]):([0-5]\d)$/;
+    /** 单元格里只放时间段，内容留在点开后的详情里。 */
+    const BOOK_CHIPS_PER_DAY = 2;
+
+    function pad2(value) {
+      return String(value).padStart(2, '0');
+    }
+
+    function keyOfDate(date) {
+      const value = date instanceof Date ? date : new Date(date);
+      if (!Number.isFinite(value.getTime())) return '';
+      return `${value.getFullYear()}-${pad2(value.getMonth() + 1)}-${pad2(value.getDate())}`;
+    }
+
+    function isDateKey(value) {
+      if (typeof value !== 'string' || !BOOK_DATE_RE.test(value)) return false;
+      const date = new Date(`${value}T00:00:00`);
+      return Number.isFinite(date.getTime()) && keyOfDate(date) === value;
+    }
+
+    function minutesOf(value) {
+      const match = BOOK_TIME_RE.exec(typeof value === 'string' ? value : '');
+      if (!match) return -1;
+      return Number(match[1]) * 60 + Number(match[2]);
+    }
+
+    function rangeLabel(booking) {
+      return `${booking.start}–${booking.end}`;
+    }
+
+    function encodeBooking(booking) {
+      const text = String(booking && booking.text ? booking.text : '')
+        .replace(/\s+/g, ' ')
+        .trim()
+        .slice(0, 160);
+      return `${BOOK_TAG}${booking.date}|${booking.start}|${booking.end}|${text}`;
+    }
+
+    function decodeBooking(idea) {
+      if (!idea || typeof idea.text !== 'string' || idea.text.slice(0, BOOK_TAG.length) !== BOOK_TAG) return null;
+      const parts = idea.text.slice(BOOK_TAG.length).split('|');
+      if (parts.length < 4) return null;
+      const date = parts[0];
+      const start = parts[1];
+      const end = parts[2];
+      const text = parts.slice(3).join('|').trim();
+      if (!isDateKey(date) || minutesOf(start) < 0 || minutesOf(end) < 0 || text === '') return null;
+      if (minutesOf(end) <= minutesOf(start)) return null;
+      return {
+        id: idea.id,
+        authorId: typeof idea.authorId === 'string' ? idea.authorId : '',
+        date,
+        start,
+        end,
+        text,
+        createdAt: idea.createdAt || '',
+        updatedAt: idea.updatedAt || idea.createdAt || '',
+        demo: idea.demo === true,
+      };
+    }
+
+    /** 拆成「墙上真正的便签」和「日历预订」两部分。 */
+    function splitBookings(ideas) {
+      const list = Array.isArray(ideas) ? ideas : [];
+      const wallIdeas = [];
+      const bookings = [];
+      for (const idea of list) {
+        const booking = decodeBooking(idea);
+        if (booking) bookings.push(booking);
+        else wallIdeas.push(idea);
+      }
+      bookings.sort((a, b) => (a.date === b.date ? minutesOf(a.start) - minutesOf(b.start) : a.date < b.date ? -1 : 1));
+      return { ideas: wallIdeas, bookings };
+    }
+
+    function overlapsWith(a, b) {
+      if (!a || !b || !a.id || a.id === b.id) return false;
+      if (a.date !== b.date) return false;
+      return minutesOf(a.start) < minutesOf(b.end) && minutesOf(b.start) < minutesOf(a.end);
+    }
+
+    /** 与某条预订时间重叠的其它预订。 */
+    function conflictsOf(booking, bookings) {
+      return (Array.isArray(bookings) ? bookings : []).filter((other) => overlapsWith(booking, other));
+    }
+
+    /** 同一天里有没有互相重叠的预订。 */
+    function hasConflict(bookings) {
+      const list = Array.isArray(bookings) ? bookings : [];
+      for (let i = 0; i < list.length; i += 1) {
+        for (let j = i + 1; j < list.length; j += 1) {
+          if (overlapsWith({ ...list[i], id: list[i].id || `a${i}` }, { ...list[j], id: list[j].id || `b${j}` })) return true;
+        }
+      }
+      return false;
+    }
+
+    function bookingsOn(bookings, dateKey) {
+      return (Array.isArray(bookings) ? bookings : []).filter((booking) => booking.date === dateKey);
+    }
+
+    /** 一个月的 6×7 格子，周一在左、周日在右。 */
+    function monthGrid(year, month) {
+      const first = new Date(year, month, 1);
+      const offset = (first.getDay() + 6) % 7;
+      const cells = [];
+      for (let index = 0; index < 42; index += 1) {
+        const date = new Date(year, month, 1 - offset + index);
+        cells.push({
+          key: keyOfDate(date),
+          day: date.getDate(),
+          inMonth: date.getMonth() === month,
+          weekend: date.getDay() === 0 || date.getDay() === 6,
+        });
+      }
+      return cells;
+    }
+
+    /**
+     * 时间下拉的档位：30 分钟一档，整天可选。
+     * 开始只能到 23:00、结束从 00:30 起，这样「结束晚于开始」永远有解。
+     */
+    const BOOK_STEP_MINUTES = 30;
+    const BOOK_DAY_MINUTES = 24 * 60;
+
+    function timeOptions(from, to, step) {
+      const options = [];
+      for (let minutes = from; minutes <= to; minutes += step) {
+        options.push(`${pad2(Math.floor(minutes / 60))}:${pad2(minutes % 60)}`);
+      }
+      return options;
+    }
+
+    const BOOK_START_TIMES = timeOptions(0, BOOK_DAY_MINUTES - 60, BOOK_STEP_MINUTES);
+    const BOOK_END_TIMES = timeOptions(BOOK_STEP_MINUTES, BOOK_DAY_MINUTES - 30, BOOK_STEP_MINUTES);
+
+    /** 下拉要能显示历史值（比如以前手填的 09:15），所以把当前值补进选项里。 */
+    function timeChoices(options, value) {
+      if (typeof value !== 'string' || minutesOf(value) < 0 || options.includes(value)) return options;
+      return [...options, value].sort((a, b) => minutesOf(a) - minutesOf(b));
+    }
+    /* @dw-bookings:end */
+
 
     /* -------------------------------------------------------------- API */
     async function request(path, { method = 'GET', body, memberId } = {}) {
@@ -2345,7 +2567,7 @@ window.__ModuleLoader__.load({
   .dw-section--todos {
     grid-area: todos;
   }
-  .dw-section--echo {
+  .dw-stack--echo {
     grid-area: echo;
   }
   .dw-section--pulse {
@@ -2370,7 +2592,7 @@ window.__ModuleLoader__.load({
       "pulse pulse pulse";
     gap: 26px;
   }
-  .dw-section--echo {
+  .dw-stack--echo {
     align-self: start;
   }
   .dw-section--echo .dw-letters {
@@ -3086,6 +3308,264 @@ window.__ModuleLoader__.load({
   background-image: linear-gradient(180deg, #1b1b24 0%, #14141c 46%, #101017 100%);
 }
 
+/* ============================================================
+   Dusk 预订日历：信箱下面的 bone well
+   ============================================================ */
+.dw-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 26px;
+  min-width: 0;
+}
+.dw-cal {
+  padding: 13px 14px 11px;
+  background-color: var(--dw-well);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 18px;
+  box-shadow: 0 30px 70px -46px rgba(0, 0, 0, 0.95);
+  color: var(--dw-well-ink);
+}
+.dw-cal__top {
+  display: flex;
+  align-items: center;
+  gap: 8px 10px;
+  flex-wrap: wrap;
+  padding: 2px 2px 10px;
+  margin-bottom: 10px;
+  border-bottom: 1px solid var(--dw-well-rule);
+}
+.dw-cal__month {
+  font-family: var(--dw-font-display);
+  font-size: 16px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+  color: var(--dw-well-ink);
+}
+.dw-cal__count {
+  font-size: 10px;
+  color: var(--dw-well-muted);
+}
+.dw-cal__nav {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.dw-cal__navbtn {
+  min-width: 26px;
+  height: 26px;
+  padding: 0 8px;
+  border: 1px solid var(--dw-well-rule);
+  border-radius: 999px;
+  background: var(--dw-card-light);
+  color: var(--dw-well-muted);
+  font-size: 12px;
+  line-height: 1;
+  cursor: pointer;
+  transition:
+    background 0.16s var(--dw-ease),
+    color 0.16s var(--dw-ease);
+}
+.dw-cal__navbtn:hover {
+  background: #e6e1d7;
+  color: var(--dw-well-ink);
+}
+.dw-cal__week,
+.dw-cal__grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 4px;
+}
+.dw-cal__week {
+  padding-bottom: 5px;
+}
+.dw-cal__week span {
+  text-align: center;
+  font-size: 9.5px;
+  letter-spacing: 0.04em;
+  color: var(--dw-well-muted);
+}
+.dw-cal__week span.is-weekend {
+  color: #6f62a8;
+}
+.dw-cal__cell {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-height: 66px;
+  padding: 5px 5px 6px;
+  border: 1px solid var(--dw-well-rule);
+  border-radius: 10px;
+  background: var(--dw-card-light);
+  text-align: left;
+  color: var(--dw-well-ink);
+  cursor: pointer;
+  overflow: hidden;
+  transition:
+    border-color 0.16s var(--dw-ease),
+    background 0.16s var(--dw-ease);
+}
+.dw-cal__cell:hover {
+  border-color: #a8a4d8;
+  background: #ffffff;
+}
+.dw-cal__cell.is-out {
+  opacity: 0.42;
+}
+.dw-cal__cell.is-today {
+  border-color: #7f7ad0;
+  box-shadow: inset 0 0 0 1px rgba(127, 122, 208, 0.32);
+}
+.dw-cal__cell.is-active {
+  box-shadow: inset 0 0 0 2px #7f7ad0;
+}
+.dw-cal__cell.has-conflict {
+  border-color: #d29a4a;
+  background: rgba(255, 210, 161, 0.22);
+}
+.dw-cal__day {
+  font-size: 10.5px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--dw-well-muted);
+}
+.dw-cal__cell.is-today .dw-cal__day {
+  color: #4b459c;
+}
+.dw-cal__flag {
+  position: absolute;
+  top: 4px;
+  right: 5px;
+  padding: 1px 4px;
+  border-radius: 999px;
+  background: #d29a4a;
+  color: #2a2118;
+  font-size: 8.5px;
+  font-weight: 700;
+  line-height: 1.3;
+}
+.dw-cal__chips {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.dw-cal__chip {
+  display: block;
+  padding: 1px 4px;
+  border-left: 2px solid #7f7ad0;
+  border-radius: 3px;
+  background: rgba(127, 122, 208, 0.14);
+  color: #3b3676;
+  font-size: 9px;
+  line-height: 1.55;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.dw-cal__chip.is-conflict {
+  border-left-color: #b5761b;
+  background: rgba(255, 210, 161, 0.3);
+  color: #6d4708;
+}
+.dw-cal__more {
+  font-size: 8.5px;
+  color: var(--dw-well-muted);
+}
+.dw-cal__foot {
+  margin-top: 9px;
+  font-size: 10px;
+  color: var(--dw-well-muted);
+  opacity: 0.85;
+}
+
+/* 当天预订：暗玻璃弹层里的行 */
+.dw-booklist {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 14px;
+  max-height: min(54vh, 430px);
+  overflow-y: auto;
+  padding-right: 2px;
+  scrollbar-width: thin;
+}
+.dw-bookrow {
+  padding: 11px 13px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-left: 2px solid var(--dw-red);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.04);
+}
+.dw-bookrow.is-conflict {
+  border-left-color: var(--dw-amber);
+  background: rgba(255, 210, 161, 0.07);
+}
+.dw-bookrow__head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.dw-bookrow__time {
+  font-size: 12px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--dw-red-deep);
+}
+.dw-bookrow__who {
+  font-size: 10.5px;
+  color: var(--dw-ink-faint);
+}
+.dw-bookrow__mine {
+  padding: 0 7px;
+  border: 1px solid rgba(185, 184, 255, 0.35);
+  border-radius: 999px;
+  font-size: 9px;
+  color: var(--dw-red-deep);
+}
+.dw-bookrow__badge {
+  padding: 1px 7px;
+  border: 1px solid rgba(255, 210, 161, 0.35);
+  border-radius: 999px;
+  background: rgba(255, 210, 161, 0.12);
+  font-size: 9px;
+  color: var(--dw-amber);
+}
+.dw-bookrow__text {
+  margin-top: 6px;
+  font-size: 12.5px;
+  line-height: 1.65;
+  color: var(--dw-ink);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.dw-bookrow__foot {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+.dw-booking-form .dw-time-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+.dw-booking-form .dw-warn {
+  margin-top: 10px;
+  padding: 7px 10px;
+  border: 1px solid rgba(255, 210, 161, 0.28);
+  border-radius: 10px;
+  background: rgba(255, 210, 161, 0.09);
+  font-size: 11px;
+  line-height: 1.6;
+  color: var(--dw-amber);
+}
+
+
+
 `;
 
 
@@ -3646,6 +4126,460 @@ window.__ModuleLoader__.load({
                   );
                 }),
               ),
+        ),
+      );
+    }
+
+    /* ------------------------------------------------------------ 预订日历 */
+    function weekdayLabels(t) {
+      const raw = t('calendarWeekdays');
+      const list = typeof raw === 'string' ? raw.split(',') : [];
+      return list.length === 7 ? list : ['一', '二', '三', '四', '五', '六', '日'];
+    }
+
+    function monthLabelOf(year, month, lang) {
+      if (lang === 'zh') return `${year} 年 ${month + 1} 月`;
+      return new Date(year, month, 1).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+    }
+
+    function dayLabelOf(dateKey, lang) {
+      const date = new Date(`${dateKey}T00:00:00`);
+      if (!Number.isFinite(date.getTime())) return dateKey;
+      return date.toLocaleDateString(lang === 'zh' ? 'zh-CN' : 'en-US', { month: 'long', day: 'numeric', weekday: 'long' });
+    }
+
+    function fillTemplate(template, values) {
+      let text = String(template);
+      for (const key of Object.keys(values)) text = text.split(`{${key}}`).join(String(values[key]));
+      return text;
+    }
+
+    function authorNameOf(actions, t, memberId) {
+      const member = actions.memberOf ? actions.memberOf(memberId) : null;
+      return member ? member.name : t('calendarUnknownAuthor');
+    }
+
+    function authorFaceOf(actions, memberId) {
+      const member = actions.memberOf ? actions.memberOf(memberId) : null;
+      return member ? member.emoji || '◌' : '◌';
+    }
+
+    function CalendarSection({ data, t, lang, me, actions }) {
+      const now = new Date();
+      const todayKey = keyOfDate(now);
+      const [cursor, setCursor] = useState({ year: now.getFullYear(), month: now.getMonth() });
+      const [sheet, setSheet] = useState(null);
+      const bookings = data.bookings || [];
+      const cells = useMemo(() => monthGrid(cursor.year, cursor.month), [cursor.year, cursor.month]);
+      const byDate = useMemo(() => {
+        const map = {};
+        for (const booking of bookings) {
+          if (!map[booking.date]) map[booking.date] = [];
+          map[booking.date].push(booking);
+        }
+        return map;
+      }, [bookings]);
+      const monthPrefix = `${cursor.year}-${String(cursor.month + 1).padStart(2, '0')}`;
+      const monthCount = bookings.filter((booking) => booking.date.slice(0, 7) === monthPrefix).length;
+
+      // 弹层自己处理 Esc：面板层的键盘监听不认识这个弹层。
+      useEffect(() => {
+        if (!sheet) return undefined;
+        function onKeyDown(event) {
+          if (event.key !== 'Escape') return;
+          event.preventDefault();
+          setSheet(null);
+        }
+        document.addEventListener('keydown', onKeyDown);
+        return () => document.removeEventListener('keydown', onKeyDown);
+      }, [sheet]);
+
+      function shiftMonth(delta) {
+        setCursor((current) => {
+          const next = new Date(current.year, current.month + delta, 1);
+          return { year: next.getFullYear(), month: next.getMonth() };
+        });
+      }
+
+      function goToday() {
+        const today = new Date();
+        setCursor({ year: today.getFullYear(), month: today.getMonth() });
+        setSheet({ mode: 'day', dateKey: keyOfDate(today) });
+      }
+
+      function openDay(dateKey) {
+        setSheet({ mode: 'day', dateKey });
+      }
+
+      function openForm(dateKey, target) {
+        setSheet({ mode: 'form', dateKey, booking: target || null });
+      }
+
+      const weekdays = weekdayLabels(t);
+      const activeDate = sheet ? sheet.dateKey : '';
+      return h(
+        'section',
+        { className: 'dw-section dw-section--calendar dw-in' },
+        h(SectionHead, {
+          title: t('calendar'),
+          tools: [
+            h('button', { key: 'today', type: 'button', className: 'dw-btn dw-btn--small dw-btn--quiet', onClick: goToday }, t('calendarToday')),
+            h('button', { key: 'book', type: 'button', className: 'dw-btn dw-btn--small', onClick: () => openForm(todayKey, null) }, `＋ ${t('calendarBook')}`),
+          ],
+        }),
+        h(
+          'div',
+          { className: 'dw-cal' },
+          h(
+            'div',
+            { className: 'dw-cal__top' },
+            h('span', { className: 'dw-cal__month' }, monthLabelOf(cursor.year, cursor.month, lang)),
+            h('span', { className: 'dw-cal__count' }, fillTemplate(t('calendarMonthCount'), { n: monthCount })),
+            h(
+              'div',
+              { className: 'dw-cal__nav' },
+              h('button', { type: 'button', className: 'dw-cal__navbtn', onClick: () => shiftMonth(-1), 'aria-label': t('calendarPrev'), title: t('calendarPrev') }, '‹'),
+              h('button', { type: 'button', className: 'dw-cal__navbtn', onClick: () => shiftMonth(1), 'aria-label': t('calendarNext'), title: t('calendarNext') }, '›'),
+            ),
+          ),
+          h(
+            'div',
+            { className: 'dw-cal__week', 'aria-hidden': 'true' },
+            weekdays.map((label, index) => h('span', { key: `${label}-${index}`, className: cx(index >= 5 && 'is-weekend') }, label)),
+          ),
+          h(
+            'div',
+            { className: 'dw-cal__grid', role: 'grid', 'aria-label': t('calendar') },
+            cells.map((cell) => {
+              const dayBookings = byDate[cell.key] || [];
+              const conflict = hasConflict(dayBookings);
+              const shown = dayBookings.slice(0, BOOK_CHIPS_PER_DAY);
+              const hidden = dayBookings.length - shown.length;
+              const label = dayBookings.length > 0 ? `${dayLabelOf(cell.key, lang)} · ${dayBookings.length}` : dayLabelOf(cell.key, lang);
+              return h(
+                'button',
+                {
+                  key: cell.key,
+                  type: 'button',
+                  role: 'gridcell',
+                  'aria-label': label,
+                  className: cx(
+                    'dw-cal__cell',
+                    !cell.inMonth && 'is-out',
+                    cell.key === todayKey && 'is-today',
+                    cell.key === activeDate && 'is-active',
+                    conflict && 'has-conflict',
+                  ),
+                  onClick: () => openDay(cell.key),
+                },
+                h('span', { className: 'dw-cal__day' }, String(cell.day)),
+                conflict ? h('span', { className: 'dw-cal__flag', 'aria-hidden': 'true' }, '!') : null,
+                shown.length > 0
+                  ? h(
+                      'span',
+                      { className: 'dw-cal__chips' },
+                      shown.map((booking) =>
+                        h(
+                          'span',
+                          {
+                            key: booking.id,
+                            className: cx('dw-cal__chip', conflictsOf(booking, dayBookings).length > 0 && 'is-conflict'),
+                            title: `${rangeLabel(booking)} · ${authorNameOf(actions, t, booking.authorId)}`,
+                          },
+                          rangeLabel(booking),
+                        ),
+                      ),
+                      hidden > 0 ? h('span', { className: 'dw-cal__more' }, `+${hidden}`) : null,
+                    )
+                  : null,
+              );
+            }),
+          ),
+          h('p', { className: 'dw-cal__foot' }, t('calendarDayHint')),
+        ),
+        sheet
+          ? h(BookingSheet, {
+              key: `${sheet.mode}:${sheet.dateKey}:${sheet.booking ? sheet.booking.id : 'new'}`,
+              t,
+              lang,
+              me,
+              actions,
+              mode: sheet.mode,
+              dateKey: sheet.dateKey,
+              booking: sheet.booking || null,
+              bookings,
+              onClose: () => setSheet(null),
+              onEdit: (booking) => openForm(booking.date, booking),
+              onNew: (dateKey) => openForm(dateKey, null),
+            })
+          : null,
+      );
+    }
+
+    function BookingSheet({ t, lang, me, actions, mode, dateKey, booking, bookings, onClose, onEdit, onNew }) {
+      const [form, setForm] = useState({
+        date: booking ? booking.date : dateKey,
+        start: booking ? booking.start : '09:00',
+        end: booking ? booking.end : '10:00',
+        text: booking ? booking.text : '',
+      });
+      const [busy, setBusy] = useState(false);
+      const [error, setError] = useState('');
+      const [armedId, setArmedId] = useState('');
+      const dayBookings = bookingsOn(bookings, dateKey);
+
+      function patch(next) {
+        setForm((current) => ({ ...current, ...next }));
+        setError('');
+      }
+
+      async function submit() {
+        if (busy) return;
+        if (!isDateKey(form.date)) {
+          setError(t('calendarDateInvalid'));
+          return;
+        }
+        if (minutesOf(form.end) <= minutesOf(form.start)) {
+          setError(t('calendarTimeInvalid'));
+          return;
+        }
+        const text = String(form.text || '').trim();
+        if (text === '') {
+          setError(t('calendarContentRequired'));
+          return;
+        }
+        if (!me) {
+          setError(t('calendarNeedIdentity'));
+          return;
+        }
+        setBusy(true);
+        setError('');
+        try {
+          await actions.saveBooking({ date: form.date, start: form.start, end: form.end, text }, booking || null);
+          actions.toast(booking ? t('calendarUpdated') : t('calendarSaved'));
+          onClose();
+        } catch (err) {
+          setError(String(err && err.message ? err.message : err));
+        } finally {
+          setBusy(false);
+        }
+      }
+
+      async function remove(target) {
+        if (armedId !== target.id) {
+          setArmedId(target.id);
+          return;
+        }
+        setBusy(true);
+        setError('');
+        try {
+          await actions.deleteBooking(target);
+          setArmedId('');
+          actions.toast(t('calendarRemoved'));
+        } catch (err) {
+          setError(String(err && err.message ? err.message : err));
+        } finally {
+          setBusy(false);
+        }
+      }
+
+      if (mode === 'day') {
+        return h(
+          React.Fragment,
+          null,
+          h('div', { className: 'dw-scrim', onClick: onClose, 'aria-hidden': 'true' }),
+          h(
+            'div',
+            { className: 'dw-card dw-card--sheet dw-in', role: 'dialog', 'aria-modal': 'true', 'aria-labelledby': 'dw-book-day-title' },
+            h(
+              'div',
+              { className: 'dw-card__head' },
+              h(
+                'div',
+                null,
+                h('p', { className: 'dw-card__kicker' }, t('calendarDayKicker')),
+                h('h2', { className: 'dw-card__title', id: 'dw-book-day-title' }, dayLabelOf(dateKey, lang)),
+              ),
+              h('button', { type: 'button', className: 'dw-close', onClick: onClose, 'aria-label': t('close') }, '×'),
+            ),
+            dayBookings.length === 0
+              ? h(EmptyBox, {
+                  title: t('calendarEmptyDay'),
+                  actions: [h(Strike, { key: 'book', label: t('calendarBookDay'), primary: true, onClick: () => onNew(dateKey) })],
+                })
+              : h(
+                  'div',
+                  { className: 'dw-booklist' },
+                  dayBookings.map((item) => {
+                    const conflicts = conflictsOf(item, dayBookings);
+                    const mine = Boolean(me && me.id === item.authorId);
+                    return h(
+                      'article',
+                      { key: item.id, className: cx('dw-bookrow', conflicts.length > 0 && 'is-conflict') },
+                      h(
+                        'div',
+                        { className: 'dw-bookrow__head' },
+                        h('span', { className: 'dw-bookrow__time' }, rangeLabel(item)),
+                        h(
+                          'span',
+                          { className: 'dw-bookrow__who' },
+                          `${authorFaceOf(actions, item.authorId)} ${authorNameOf(actions, t, item.authorId)}`,
+                        ),
+                        mine ? h('span', { className: 'dw-bookrow__mine' }, t('calendarMine')) : null,
+                        h('span', { style: { flex: 1 } }),
+                        conflicts.length > 0
+                          ? h(
+                              'span',
+                              {
+                                className: 'dw-bookrow__badge',
+                                title: fillTemplate(t('calendarConflictWith'), {
+                                  who: authorNameOf(actions, t, conflicts[0].authorId),
+                                  range: rangeLabel(conflicts[0]),
+                                }),
+                              },
+                              `${t('calendarConflict')} · ${rangeLabel(conflicts[0])}`,
+                            )
+                          : null,
+                      ),
+                      h('p', { className: 'dw-bookrow__text' }, item.text),
+                      mine
+                        ? h(
+                            'div',
+                            { className: 'dw-bookrow__foot' },
+                            h('button', { type: 'button', className: 'dw-linkbtn', onClick: () => onEdit(item) }, t('edit')),
+                            h(
+                              'button',
+                              {
+                                type: 'button',
+                                className: cx('dw-linkbtn', 'dw-linkbtn--danger', armedId === item.id && 'is-armed'),
+                                onClick: () => remove(item),
+                                disabled: busy,
+                              },
+                              armedId === item.id ? t('confirmDelete') : t('calendarRemove'),
+                            ),
+                          )
+                        : null,
+                    );
+                  }),
+                ),
+            error ? h('p', { className: 'dw-error', style: { marginTop: 8 } }, error) : null,
+            h(
+              'div',
+              { className: 'dw-form-foot' },
+              h('span', { className: 'dw-hint' }, t('calendarHint')),
+              h('button', { type: 'button', className: 'dw-btn dw-btn--primary', onClick: () => onNew(dateKey) }, `＋ ${t('calendarBookDay')}`),
+            ),
+          ),
+        );
+      }
+
+      // 填写模式：一边填一边算这次会不会撞上别人。
+      const ready = isDateKey(form.date) && minutesOf(form.end) > minutesOf(form.start);
+      const clash = ready ? conflictsOf({ id: booking ? booking.id : '__new__', date: form.date, start: form.start, end: form.end }, bookings)[0] || null : null;
+      const warning = clash
+        ? fillTemplate(t('calendarConflictWarn'), { who: authorNameOf(actions, t, clash.authorId), range: rangeLabel(clash) })
+        : '';
+      return h(
+        React.Fragment,
+        null,
+        h('div', { className: 'dw-scrim', onClick: onClose, 'aria-hidden': 'true' }),
+        h(
+          'div',
+          { className: 'dw-card dw-card--sheet dw-booking-form dw-in', role: 'dialog', 'aria-modal': 'true', 'aria-labelledby': 'dw-book-form-title' },
+          h(
+            'div',
+            { className: 'dw-card__head' },
+            h(
+              'div',
+              null,
+              h('p', { className: 'dw-card__kicker' }, t('calendarFormKicker')),
+              h('h2', { className: 'dw-card__title', id: 'dw-book-form-title' }, booking ? t('calendarEditTitle') : t('calendarBook')),
+            ),
+            h('button', { type: 'button', className: 'dw-close', onClick: onClose, 'aria-label': t('close') }, '×'),
+          ),
+          h(
+            'div',
+            { className: 'dw-field' },
+            h('label', { className: 'dw-field__label', htmlFor: 'dw-book-date' }, t('calendarDate')),
+            h('input', {
+              id: 'dw-book-date',
+              className: 'dw-input',
+              type: 'date',
+              value: form.date,
+              onChange: (event) => patch({ date: event.target.value }),
+            }),
+          ),
+          h(
+            'div',
+            { className: 'dw-time-row' },
+            h(
+              'div',
+              { className: 'dw-field' },
+              h('label', { className: 'dw-field__label', htmlFor: 'dw-book-start' }, t('calendarStart')),
+              h(
+                'select',
+                {
+                  id: 'dw-book-start',
+                  className: 'dw-input dw-select',
+                  value: form.start,
+                  onChange: (event) => {
+                    const start = event.target.value;
+                    const next = { start };
+                    // 开始时间挪到结束之后时，把结束顺手往后推一小时。
+                    if (minutesOf(form.end) <= minutesOf(start)) {
+                      const bumped = Math.min(minutesOf(start) + 60, BOOK_DAY_MINUTES - 30);
+                      next.end = `${pad2(Math.floor(bumped / 60))}:${pad2(bumped % 60)}`;
+                    }
+                    patch(next);
+                  },
+                },
+                timeChoices(BOOK_START_TIMES, form.start).map((value) => h('option', { key: value, value }, value)),
+              ),
+            ),
+            h(
+              'div',
+              { className: 'dw-field' },
+              h('label', { className: 'dw-field__label', htmlFor: 'dw-book-end' }, t('calendarEnd')),
+              h(
+                'select',
+                {
+                  id: 'dw-book-end',
+                  className: 'dw-input dw-select',
+                  value: form.end,
+                  onChange: (event) => patch({ end: event.target.value }),
+                },
+                timeChoices(BOOK_END_TIMES, form.end).map((value) => h('option', { key: value, value }, value)),
+              ),
+            ),
+          ),
+          warning ? h('p', { className: 'dw-warn' }, warning) : null,
+          h(
+            'div',
+            { className: 'dw-field' },
+            h('label', { className: 'dw-field__label', htmlFor: 'dw-book-text' }, t('calendarContent')),
+            h('textarea', {
+              id: 'dw-book-text',
+              className: 'dw-textarea',
+              value: form.text,
+              maxLength: 160,
+              placeholder: t('calendarContentPlaceholder'),
+              onChange: (event) => patch({ text: event.target.value }),
+              onKeyDown: (event) => {
+                if ((event.metaKey || event.ctrlKey) && event.key === 'Enter') {
+                  event.preventDefault();
+                  void submit();
+                }
+              },
+            }),
+            h('div', { className: 'dw-counter' }, `${form.text.length} / 160`),
+          ),
+          error ? h('p', { className: 'dw-error', style: { marginTop: 8 } }, error) : null,
+          h(
+            'div',
+            { className: 'dw-form-foot' },
+            h('span', { className: 'dw-hint' }, t('composerHint')),
+            h('button', { type: 'button', className: 'dw-btn dw-btn--primary', onClick: submit, disabled: busy }, busy ? t('calendarSaving') : t('submit')),
+          ),
         ),
       );
     }
@@ -4759,6 +5693,23 @@ window.__ModuleLoader__.load({
         return () => document.removeEventListener('keydown', onKeyDown);
       });
 
+      async function saveBooking(input, existing) {
+        const member = meRef.current;
+        if (!member) throw new Error(t('calendarNeedIdentity'));
+        const text = encodeBooking(input);
+        if (existing) {
+          await request(`/ideas/${existing.id}`, { method: 'PATCH', body: { text } });
+        } else {
+          await request('/ideas', { method: 'POST', body: { text }, memberId: member.id });
+        }
+        await refresh();
+      }
+
+      async function deleteBooking(booking) {
+        await request(`/ideas/${booking.id}`, { method: 'DELETE' });
+        await refresh();
+      }
+
       const actions = {
         emojiOf: (memberId) => {
           const member = memberById(memberId);
@@ -4768,6 +5719,9 @@ window.__ModuleLoader__.load({
           const member = memberById(memberId);
           return member ? member.name : t('anonymous');
         },
+        memberOf: (memberId) => memberById(memberId),
+        saveBooking,
+        deleteBooking,
         toast: showToast,
         toggleOpenIdea: (id) => setOpenIdeaId((current) => (current === id ? null : id)),
         hasEchoed: (opinion) => Boolean(me && me.id && Array.isArray(opinion.reactions && opinion.reactions.echo && opinion.reactions.echo.by) && opinion.reactions.echo.by.includes(me.id)),
@@ -4784,11 +5738,14 @@ window.__ModuleLoader__.load({
         clearDemo,
       };
 
+      // 日历预订以带标记的便签存在墙上：渲染前摘出来，灵感便签里不再出现它们。
+      const view = useMemo(() => (snapshot ? { ...snapshot, ...splitBookings(snapshot.ideas) } : null), [snapshot]);
+
       const hasDemo = Boolean(
-        snapshot &&
-          (snapshot.ideas.some((item) => item.demo) ||
-            snapshot.todos.some((item) => item.demo) ||
-            snapshot.opinions.some((item) => item.demo)),
+        view &&
+          (view.ideas.some((item) => item.demo) ||
+            view.todos.some((item) => item.demo) ||
+            view.opinions.some((item) => item.demo)),
       );
 
       return h(
@@ -4849,7 +5806,7 @@ window.__ModuleLoader__.load({
                           lang === 'zh' ? '清除示例' : 'Clear demo',
                         )
                       : null,
-                    h(Presence, { members: snapshot.members, online, me, t }),
+                    h(Presence, { members: view.members, online, me, t }),
                     h(
                       'button',
                       { type: 'button', className: 'dw-btn', onClick: openMorning },
@@ -4896,7 +5853,7 @@ window.__ModuleLoader__.load({
                   'div',
                   { className: 'dw-grid' },
                   h(IdeasSection, {
-                    data: snapshot,
+                    data: view,
                     t,
                     lang,
                     me,
@@ -4905,12 +5862,17 @@ window.__ModuleLoader__.load({
                     onCompose: openComposer,
                     onDemo: seedDemo,
                   }),
-                  h(TodosSection, { data: snapshot, t, lang, me, actions, onCompose: openComposer }),
+                  h(TodosSection, { data: view, t, lang, me, actions, onCompose: openComposer }),
                   h(
                     'div',
                     { className: 'dw-rail' },
-                    h(EchoSection, { data: snapshot, t, lang, actions, onCompose: openComposer }),
-                    h(PulseSection, { data: snapshot, t, lang, me, online }),
+                    h(
+                      'div',
+                      { className: 'dw-stack dw-stack--echo' },
+                      h(EchoSection, { data: view, t, lang, actions, onCompose: openComposer }),
+                      h(CalendarSection, { data: view, t, lang, me, actions }),
+                    ),
+                    h(PulseSection, { data: view, t, lang, me, online }),
                   ),
                 ),
               ),
@@ -4943,7 +5905,7 @@ window.__ModuleLoader__.load({
                     t,
                     lang,
                     me,
-                    members: snapshot.members,
+                    members: view.members,
                     busy: identityBusy,
                     error: identityError,
                     onSave: saveIdentity,
@@ -4959,7 +5921,7 @@ window.__ModuleLoader__.load({
                 ? h(MorningView, {
                     t,
                     lang,
-                    data: snapshot,
+                    data: view,
                     me,
                     online,
                     page: morning.page,
